@@ -1,0 +1,1065 @@
+{
+  "version": "1.0.0",
+  "exportDate": "2026-02-16T00:45:00.000Z",
+  "trips": [
+    {
+      "id": 1001,
+      "name": "Banff Backpacking",
+      "destination": "Banff National Park, Alberta",
+      "description": "Multi-day backpacking trip through the Canadian Rockies",
+      "startDate": "2024-08-15",
+      "endDate": "2024-08-22",
+      "status": "Completed",
+      "todos": [
+        {"id": 10001, "title": "Book backcountry permits", "description": "Reserve campsites", "completed": true},
+        {"id": 10002, "title": "Rent bear canister", "description": "Pick up from visitor center", "completed": true},
+        {"id": 10003, "title": "Buy trail snacks", "description": "Get high-calorie options", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10004, "title": "Backcountry permits", "description": "7 nights", "amount": 105.00, "category": "Permits"},
+        {"id": 10005, "title": "Rental car", "description": "SUV for 8 days", "amount": 560.00, "category": "Transportation"},
+        {"id": 10006, "title": "Gas", "description": "Calgary to Banff", "amount": 78.50, "category": "Transportation"},
+        {"id": 10007, "title": "Groceries", "description": "Trail food", "amount": 145.25, "category": "Food"}
+      ],
+      "notes": "Amazing trip! Saw elk, mountain goats, and even a grizzly (from a safe distance). The weather was perfect except for one rainy afternoon."
+    },
+    {
+      "id": 1002,
+      "name": "NYC Weekend",
+      "destination": "New York City, NY",
+      "description": "Quick city break to see Broadway shows and museums",
+      "startDate": "2024-10-12",
+      "endDate": "2024-10-14",
+      "status": "Completed",
+      "todos": [
+        {"id": 10008, "title": "Buy Broadway tickets", "description": "Hamilton matinee", "completed": true},
+        {"id": 10009, "title": "Reserve MoMA tickets", "description": "Sunday morning", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10010, "title": "Hotel", "description": "2 nights in Manhattan", "amount": 450.00, "category": "Lodging"},
+        {"id": 10011, "title": "Broadway tickets", "description": "2 tickets for Hamilton", "amount": 285.00, "category": "Activities"},
+        {"id": 10012, "title": "Flights", "description": "Round-trip", "amount": 320.00, "category": "Transportation"},
+        {"id": 10013, "title": "Meals", "description": "Restaurants & cafes", "amount": 210.50, "category": "Food"}
+      ],
+      "notes": "Great show, loved the city energy. MoMA was crowded but worth it."
+    },
+    {
+      "id": 1003,
+      "name": "Family Reunion - Tahoe",
+      "destination": "Lake Tahoe, CA",
+      "description": "Annual family gathering with cousins",
+      "startDate": "2024-07-04",
+      "endDate": "2024-07-07",
+      "status": "Completed",
+      "todos": [
+        {"id": 10014, "title": "Book cabin", "description": "Sleeps 12 people", "completed": true},
+        {"id": 10015, "title": "Coordinate potluck", "description": "Email family list", "completed": true},
+        {"id": 10016, "title": "Rent kayaks", "description": "For Saturday", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10017, "title": "Cabin rental", "description": "3 nights split 4 ways", "amount": 425.00, "category": "Lodging"},
+        {"id": 10018, "title": "Kayak rental", "description": "4 kayaks for the day", "amount": 160.00, "category": "Activities"},
+        {"id": 10019, "title": "Groceries", "description": "My share of food", "amount": 95.75, "category": "Food"}
+      ],
+      "notes": "Kids had a blast swimming and kayaking. Aunt Marie's potato salad was legendary as always."
+    },
+    {
+      "id": 1004,
+      "name": "Portland Food Tour",
+      "destination": "Portland, OR",
+      "description": "Weekend exploring food carts and breweries",
+      "startDate": "2024-09-20",
+      "endDate": "2024-09-22",
+      "status": "Completed",
+      "todos": [
+        {"id": 10020, "title": "Research food cart pods", "description": "Make a hit list", "completed": true},
+        {"id": 10021, "title": "Book brewery tour", "description": "Saturday afternoon", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10022, "title": "Airbnb", "description": "2 nights", "amount": 185.00, "category": "Lodging"},
+        {"id": 10023, "title": "Food & drinks", "description": "All meals", "amount": 275.50, "category": "Food"},
+        {"id": 10024, "title": "Gas", "description": "Round trip", "amount": 45.00, "category": "Transportation"}
+      ],
+      "notes": "Hit Cartopia, Prost Marketplace, and Pine Street Market. Loved the vibe of the city."
+    },
+    {
+      "id": 1005,
+      "name": "Chicago Conference",
+      "destination": "Chicago, IL",
+      "description": "React Summit 2024 conference",
+      "startDate": "2024-11-05",
+      "endDate": "2024-11-08",
+      "status": "Completed",
+      "todos": [
+        {"id": 10025, "title": "Register for conference", "description": "Early bird pricing", "completed": true},
+        {"id": 10026, "title": "Submit expense report", "description": "Within 30 days", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10027, "title": "Conference ticket", "description": "3-day pass", "amount": 899.00, "category": "Activities"},
+        {"id": 10028, "title": "Hotel", "description": "3 nights near venue", "amount": 510.00, "category": "Lodging"},
+        {"id": 10029, "title": "Flights", "description": "Round-trip", "amount": 285.00, "category": "Transportation"},
+        {"id": 10030, "title": "Meals", "description": "Not provided by conf", "amount": 180.00, "category": "Food"}
+      ],
+      "notes": "Great talks on React Server Components and the new compiler. Networking was valuable."
+    },
+    {
+      "id": 1006,
+      "name": "Austin SXSW",
+      "destination": "Austin, TX",
+      "description": "SXSW music and tech festival",
+      "startDate": "2025-03-10",
+      "endDate": "2025-03-15",
+      "status": "Completed",
+      "todos": [
+        {"id": 10031, "title": "Buy festival badge", "description": "Interactive pass", "completed": true},
+        {"id": 10032, "title": "Book accommodation early", "description": "Prices surge during SXSW", "completed": true},
+        {"id": 10033, "title": "Download SXSW app", "description": "For schedule", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10034, "title": "Festival badge", "description": "Interactive pass", "amount": 1295.00, "category": "Activities"},
+        {"id": 10035, "title": "Hotel", "description": "5 nights", "amount": 950.00, "category": "Lodging"},
+        {"id": 10036, "title": "Flights", "description": "Round-trip", "amount": 340.00, "category": "Transportation"},
+        {"id": 10037, "title": "Food & drinks", "description": "BBQ and tacos!", "amount": 425.00, "category": "Food"}
+      ],
+      "notes": "Incredible lineup! Saw amazing panels on AI in music production. The BBQ lived up to the hype."
+    },
+    {
+      "id": 1007,
+      "name": "Boston Marathon Trip",
+      "destination": "Boston, MA",
+      "description": "Running the Boston Marathon!",
+      "startDate": "2024-04-13",
+      "endDate": "2024-04-17",
+      "status": "Completed",
+      "todos": [
+        {"id": 10038, "title": "Pick up race packet", "description": "Fri or Sat at expo", "completed": true},
+        {"id": 10039, "title": "Carb load dinner", "description": "Friday night", "completed": true},
+        {"id": 10040, "title": "Study the course", "description": "Know where Heartbreak Hill is", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10041, "title": "Hotel", "description": "4 nights", "amount": 720.00, "category": "Lodging"},
+        {"id": 10042, "title": "Flights", "description": "Round-trip", "amount": 380.00, "category": "Transportation"},
+        {"id": 10043, "title": "Race entry", "description": "Qualified time", "amount": 205.00, "category": "Activities"},
+        {"id": 10044, "title": "Meals", "description": "Pre & post race", "amount": 215.00, "category": "Food"}
+      ],
+      "notes": "Finished in 3:42:18! Heartbreak Hill was brutal but the crowd support was unreal. Bucket list item checked!"
+    },
+    {
+      "id": 1008,
+      "name": "Yellowstone Wildlife Tour",
+      "destination": "Yellowstone National Park, WY",
+      "description": "Early spring wildlife viewing",
+      "startDate": "2024-05-10",
+      "endDate": "2024-05-14",
+      "status": "Completed",
+      "todos": [
+        {"id": 10045, "title": "Book guided tour", "description": "Early morning wildlife", "completed": true},
+        {"id": 10046, "title": "Rent telephoto lens", "description": "For wildlife photos", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10047, "title": "Lodge", "description": "4 nights Old Faithful Inn", "amount": 580.00, "category": "Lodging"},
+        {"id": 10048, "title": "Guided tours", "description": "2 morning tours", "amount": 350.00, "category": "Activities"},
+        {"id": 10049, "title": "Car rental", "description": "5 days", "amount": 275.00, "category": "Transportation"},
+        {"id": 10050, "title": "Park entry", "description": "Private vehicle", "amount": 35.00, "category": "Permits"}
+      ],
+      "notes": "Saw wolves, grizzlies, bison, and elk! The Lamar Valley at sunrise was magical."
+    },
+    {
+      "id": 1009,
+      "name": "Hawaii Big Island",
+      "destination": "Kailua-Kona, HI",
+      "description": "Beach vacation and volcano exploration",
+      "startDate": "2024-12-20",
+      "endDate": "2024-12-27",
+      "status": "Completed",
+      "todos": [
+        {"id": 10051, "title": "Book condo", "description": "Ocean view", "completed": true},
+        {"id": 10052, "title": "Reserve snorkel gear", "description": "For Kealakekua Bay", "completed": true},
+        {"id": 10053, "title": "Book volcano tour", "description": "Day trip to Volcanoes NP", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10054, "title": "Condo rental", "description": "7 nights", "amount": 1750.00, "category": "Lodging"},
+        {"id": 10055, "title": "Flights", "description": "Round-trip for 2", "amount": 980.00, "category": "Transportation"},
+        {"id": 10056, "title": "Car rental", "description": "8 days", "amount": 420.00, "category": "Transportation"},
+        {"id": 10057, "title": "Snorkel tour", "description": "Captain Cook monument", "amount": 185.00, "category": "Activities"},
+        {"id": 10058, "title": "Volcano tour", "description": "Full day guided", "amount": 225.00, "category": "Activities"},
+        {"id": 10059, "title": "Groceries", "description": "Cooking at condo", "amount": 380.00, "category": "Food"}
+      ],
+      "notes": "Perfect escape from winter! Snorkeling with manta rays was surreal. Lava flows at night = incredible."
+    },
+    {
+      "id": 1010,
+      "name": "Seattle Music Festival",
+      "destination": "Seattle, WA",
+      "description": "Capitol Hill Block Party",
+      "startDate": "2024-07-19",
+      "endDate": "2024-07-21",
+      "status": "Completed",
+      "todos": [
+        {"id": 10060, "title": "Buy 3-day pass", "description": "General admission", "completed": true},
+        {"id": 10061, "title": "Book hostel", "description": "Capitol Hill area", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10062, "title": "Festival pass", "description": "3-day GA", "amount": 195.00, "category": "Activities"},
+        {"id": 10063, "title": "Hostel", "description": "2 nights", "amount": 120.00, "category": "Lodging"},
+        {"id": 10064, "title": "Gas", "description": "Round trip from Portland", "amount": 55.00, "category": "Transportation"},
+        {"id": 10065, "title": "Food", "description": "Street food & coffee", "amount": 95.00, "category": "Food"}
+      ],
+      "notes": "Great local bands! Loved the neighborhood vibe. Pike Place Market breakfast was clutch."
+    },
+    {
+      "id": 1011,
+      "name": "Japan Spring Cherry Blossoms",
+      "destination": "Tokyo & Kyoto, Japan",
+      "description": "Two weeks exploring Japan during sakura season",
+      "startDate": "2026-03-25",
+      "endDate": "2026-04-08",
+      "status": "Planning",
+      "todos": [
+        {"id": 10066, "title": "Apply for passport", "description": "Need 6 months validity", "completed": false},
+        {"id": 10067, "title": "Book flights", "description": "Watch for deals", "completed": false},
+        {"id": 10068, "title": "Reserve ryokan", "description": "Traditional inn in Kyoto", "completed": false},
+        {"id": 10069, "title": "Get JR Pass", "description": "7-day pass", "completed": false},
+        {"id": 10070, "title": "Learn basic Japanese", "description": "Greetings & numbers", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10071, "title": "Flights", "description": "Estimated round-trip", "amount": 1200.00, "category": "Transportation"},
+        {"id": 10072, "title": "Hotels", "description": "14 nights budget", "amount": 1680.00, "category": "Lodging"},
+        {"id": 10073, "title": "JR Pass", "description": "7-day pass", "amount": 280.00, "category": "Transportation"}
+      ],
+      "notes": "Dream trip! Need to book early for cherry blossom season. Priority: see Mt. Fuji, visit temples, eat ALL the ramen."
+    },
+    {
+      "id": 1012,
+      "name": "Colorado Skiing - Vail",
+      "destination": "Vail, CO",
+      "description": "Week-long ski trip with college friends",
+      "startDate": "2026-02-28",
+      "endDate": "2026-03-07",
+      "status": "Committed",
+      "todos": [
+        {"id": 10074, "title": "Book condo", "description": "Walking distance to lifts", "completed": true},
+        {"id": 10075, "title": "Buy lift tickets", "description": "Epic Pass or multi-day", "completed": true},
+        {"id": 10076, "title": "Rent ski gear", "description": "Reserve online for discount", "completed": false},
+        {"id": 10077, "title": "Book flights", "description": "Into Denver", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10078, "title": "Condo share", "description": "7 nights split 4 ways", "amount": 625.00, "category": "Lodging"},
+        {"id": 10079, "title": "Epic Pass", "description": "7-day pass", "amount": 589.00, "category": "Activities"},
+        {"id": 10080, "title": "Flights", "description": "Round-trip to Denver", "amount": 320.00, "category": "Transportation"},
+        {"id": 10081, "title": "Ski rental", "description": "Full package 7 days", "amount": 245.00, "category": "Activities"},
+        {"id": 10082, "title": "Groceries estimate", "description": "My share", "amount": 150.00, "category": "Food"}
+      ],
+      "notes": "Can't wait! Last time we went was 2022. Hopefully powder conditions are good."
+    },
+    {
+      "id": 1013,
+      "name": "Iceland Ring Road",
+      "destination": "Reykjavik, Iceland",
+      "description": "10-day road trip around Iceland",
+      "startDate": "2026-06-15",
+      "endDate": "2026-06-25",
+      "status": "Planning",
+      "todos": [
+        {"id": 10083, "title": "Rent 4WD vehicle", "description": "For F-roads", "completed": false},
+        {"id": 10084, "title": "Book accommodations", "description": "Mix of hotels and guesthouses", "completed": false},
+        {"id": 10085, "title": "Reserve Blue Lagoon", "description": "For arrival day", "completed": false},
+        {"id": 10086, "title": "Download offline maps", "description": "Cell service is spotty", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10087, "title": "Flights", "description": "Estimated round-trip", "amount": 850.00, "category": "Transportation"},
+        {"id": 10088, "title": "Car rental", "description": "10 days 4WD", "amount": 1200.00, "category": "Transportation"},
+        {"id": 10089, "title": "Accommodations", "description": "9 nights average $150/night", "amount": 1350.00, "category": "Lodging"},
+        {"id": 10090, "title": "Gas estimate", "description": "Full Ring Road", "amount": 300.00, "category": "Transportation"}
+      ],
+      "notes": "Want to see waterfalls, glaciers, hot springs, and northern lights. June = midnight sun!"
+    },
+    {
+      "id": 1014,
+      "name": "New Orleans Jazz Fest",
+      "destination": "New Orleans, LA",
+      "description": "Jazz & Heritage Festival weekend",
+      "startDate": "2026-04-24",
+      "endDate": "2026-04-27",
+      "status": "Planning",
+      "todos": [
+        {"id": 10091, "title": "Buy festival tickets", "description": "Weekend pass", "completed": false},
+        {"id": 10092, "title": "Book hotel", "description": "French Quarter", "completed": false},
+        {"id": 10093, "title": "Research food spots", "description": "Beignets, gumbo, po'boys", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10094, "title": "Festival tickets", "description": "3-day pass", "amount": 285.00, "category": "Activities"},
+        {"id": 10095, "title": "Hotel", "description": "3 nights", "amount": 480.00, "category": "Lodging"},
+        {"id": 10096, "title": "Flights", "description": "Round-trip estimate", "amount": 295.00, "category": "Transportation"}
+      ],
+      "notes": "First time to NOLA! Must try Cafe Du Monde and see some live music on Frenchmen Street."
+    },
+    {
+      "id": 1015,
+      "name": "Alaska Cruise",
+      "destination": "Inside Passage, Alaska",
+      "description": "7-day cruise from Seattle",
+      "startDate": "2026-08-10",
+      "endDate": "2026-08-17",
+      "status": "Planning",
+      "todos": [
+        {"id": 10097, "title": "Book cruise", "description": "Balcony cabin", "completed": false},
+        {"id": 10098, "title": "Book shore excursions", "description": "Glacier viewing, whale watching", "completed": false},
+        {"id": 10099, "title": "Get cold weather gear", "description": "Layers and rain jacket", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10100, "title": "Cruise fare", "description": "7 nights balcony", "amount": 1850.00, "category": "Transportation"},
+        {"id": 10101, "title": "Shore excursions", "description": "3 ports estimate", "amount": 450.00, "category": "Activities"},
+        {"id": 10102, "title": "Gratuities", "description": "Prepaid tips", "amount": 175.00, "category": "Other"}
+      ],
+      "notes": "Ports: Juneau, Skagway, Ketchikan. Hoping to see whales, bears, and calving glaciers!"
+    },
+    {
+      "id": 1016,
+      "name": "Nashville Bachelorette Party",
+      "destination": "Nashville, TN",
+      "description": "Friend's bachelorette weekend",
+      "startDate": "2026-05-15",
+      "endDate": "2026-05-17",
+      "status": "Committed",
+      "todos": [
+        {"id": 10103, "title": "Book Airbnb", "description": "Group of 8", "completed": true},
+        {"id": 10104, "title": "Plan itinerary", "description": "Honky tonks & brunch", "completed": false},
+        {"id": 10105, "title": "Order decorations", "description": "Bride-to-be sash & supplies", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10106, "title": "Airbnb share", "description": "2 nights split 8 ways", "amount": 95.00, "category": "Lodging"},
+        {"id": 10107, "title": "Flights", "description": "Round-trip", "amount": 240.00, "category": "Transportation"},
+        {"id": 10108, "title": "Food & drinks", "description": "Estimate for weekend", "amount": 200.00, "category": "Food"}
+      ],
+      "notes": "Broadway bars, hot chicken, and country music! Going to be a blast."
+    },
+    {
+      "id": 1017,
+      "name": "Zion National Park",
+      "destination": "Springdale, UT",
+      "description": "Long weekend hiking in Zion",
+      "startDate": "2026-09-18",
+      "endDate": "2026-09-22",
+      "status": "Planning",
+      "todos": [
+        {"id": 10109, "title": "Enter Angels Landing permit lottery", "description": "Apply 3 months before", "completed": false},
+        {"id": 10110, "title": "Book hotel", "description": "Springdale has better options", "completed": false},
+        {"id": 10111, "title": "Research shuttle system", "description": "No cars in canyon", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10112, "title": "Hotel", "description": "4 nights", "amount": 560.00, "category": "Lodging"},
+        {"id": 10113, "title": "Park entry", "description": "Private vehicle 7-day", "amount": 35.00, "category": "Permits"},
+        {"id": 10114, "title": "Gas", "description": "Road trip from Phoenix", "amount": 85.00, "category": "Transportation"}
+      ],
+      "notes": "The Narrows and Angels Landing are must-dos. September should have perfect weather."
+    },
+    {
+      "id": 1018,
+      "name": "Montreal Food & Culture",
+      "destination": "Montreal, Quebec",
+      "description": "5 days exploring Montreal",
+      "startDate": "2026-07-10",
+      "endDate": "2026-07-15",
+      "status": "Planning",
+      "todos": [
+        {"id": 10115, "title": "Book boutique hotel", "description": "Old Montreal area", "completed": false},
+        {"id": 10116, "title": "Make restaurant reservations", "description": "Joe Beef, Au Pied de Cochon", "completed": false},
+        {"id": 10117, "title": "Learn basic French", "description": "Menu terms at least", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10118, "title": "Hotel", "description": "5 nights", "amount": 625.00, "category": "Lodging"},
+        {"id": 10119, "title": "Flights", "description": "Round-trip", "amount": 310.00, "category": "Transportation"},
+        {"id": 10120, "title": "Food budget", "description": "Fine dining included", "amount": 500.00, "category": "Food"}
+      ],
+      "notes": "Can't wait for poutine, smoked meat, and bagels! Also want to explore Mont-Royal park."
+    },
+    {
+      "id": 1019,
+      "name": "San Diego Comic-Con",
+      "destination": "San Diego, CA",
+      "description": "Comic-Con International 2026",
+      "startDate": "2026-07-23",
+      "endDate": "2026-07-26",
+      "status": "Planning",
+      "todos": [
+        {"id": 10121, "title": "Enter badge lottery", "description": "Registration in Feb", "completed": false},
+        {"id": 10122, "title": "Book hotel", "description": "Downtown near convention center", "completed": false},
+        {"id": 10123, "title": "Plan panel schedule", "description": "Hall H vs smaller rooms", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10124, "title": "4-day badge", "description": "If I win lottery", "amount": 285.00, "category": "Activities"},
+        {"id": 10125, "title": "Hotel", "description": "4 nights", "amount": 880.00, "category": "Lodging"},
+        {"id": 10126, "title": "Gas", "description": "From LA", "amount": 40.00, "category": "Transportation"}
+      ],
+      "notes": "Fingers crossed for badge! Want to see Marvel panels and check out Artist Alley."
+    },
+    {
+      "id": 1020,
+      "name": "Scotland Highlands Tour",
+      "destination": "Edinburgh & Scottish Highlands",
+      "description": "10 days exploring castles and whisky distilleries",
+      "startDate": "2027-05-20",
+      "endDate": "2027-05-30",
+      "status": "Planning",
+      "todos": [
+        {"id": 10127, "title": "Book flights", "description": "Into Edinburgh", "completed": false},
+        {"id": 10128, "title": "Rent car", "description": "Practice driving on left!", "completed": false},
+        {"id": 10129, "title": "Book castle tours", "description": "Edinburgh, Stirling, Eilean Donan", "completed": false},
+        {"id": 10130, "title": "Reserve distillery tours", "description": "Speyside region", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10131, "title": "Flights", "description": "Round-trip estimate", "amount": 950.00, "category": "Transportation"},
+        {"id": 10132, "title": "Car rental", "description": "10 days", "amount": 450.00, "category": "Transportation"},
+        {"id": 10133, "title": "Accommodations", "description": "Mix of B&Bs", "amount": 1200.00, "category": "Lodging"},
+        {"id": 10134, "title": "Tours & activities", "description": "Castles, distilleries", "amount": 400.00, "category": "Activities"}
+      ],
+      "notes": "Always wanted to see the Highlands! Isle of Skye, Loch Ness, and whisky tasting are priorities."
+    },
+    {
+      "id": 1021,
+      "name": "Santa Fe Art & Culture",
+      "destination": "Santa Fe, NM",
+      "description": "Long weekend exploring art galleries and cuisine",
+      "startDate": "2026-10-08",
+      "endDate": "2026-10-11",
+      "status": "Planning",
+      "todos": [
+        {"id": 10135, "title": "Book hotel", "description": "Downtown plaza area", "completed": false},
+        {"id": 10136, "title": "Research galleries", "description": "Canyon Road art walk", "completed": false},
+        {"id": 10137, "title": "Make dinner reservations", "description": "Try green chile everything", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10138, "title": "Hotel", "description": "3 nights", "amount": 420.00, "category": "Lodging"},
+        {"id": 10139, "title": "Flights", "description": "Into Albuquerque", "amount": 280.00, "category": "Transportation"},
+        {"id": 10140, "title": "Rental car", "description": "4 days", "amount": 180.00, "category": "Transportation"}
+      ],
+      "notes": "Love the adobe architecture! Want to visit Meow Wolf and explore the art scene."
+    },
+    {
+      "id": 1022,
+      "name": "Miami Art Basel",
+      "destination": "Miami, FL",
+      "description": "Art Basel Miami Beach 2026",
+      "startDate": "2026-12-03",
+      "endDate": "2026-12-06",
+      "status": "Planning",
+      "todos": [
+        {"id": 10141, "title": "Buy Art Basel tickets", "description": "Preview day if possible", "completed": false},
+        {"id": 10142, "title": "Book South Beach hotel", "description": "Near convention center", "completed": false},
+        {"id": 10143, "title": "Research satellite fairs", "description": "Design Miami, NADA", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10144, "title": "Art Basel pass", "description": "Multi-day", "amount": 195.00, "category": "Activities"},
+        {"id": 10145, "title": "Hotel", "description": "3 nights South Beach", "amount": 650.00, "category": "Lodging"},
+        {"id": 10146, "title": "Flights", "description": "Round-trip", "amount": 320.00, "category": "Transportation"}
+      ],
+      "notes": "Excited to see contemporary art and soak up Miami vibes. Beach time between galleries!"
+    },
+    {
+      "id": 1023,
+      "name": "Patagonia Trekking",
+      "destination": "Torres del Paine, Chile",
+      "description": "W Trek in Patagonia - bucket list hike",
+      "startDate": "2027-02-10",
+      "endDate": "2027-02-20",
+      "status": "Planning",
+      "todos": [
+        {"id": 10147, "title": "Book flights", "description": "To Punta Arenas", "completed": false},
+        {"id": 10148, "title": "Reserve refugios", "description": "Book 9-12 months ahead!", "completed": false},
+        {"id": 10149, "title": "Buy trekking gear", "description": "Quality rain gear essential", "completed": false},
+        {"id": 10150, "title": "Get travel insurance", "description": "With evacuation coverage", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10151, "title": "Flights", "description": "Round-trip to Chile", "amount": 1400.00, "category": "Transportation"},
+        {"id": 10152, "title": "Refugio bookings", "description": "5 nights accommodation", "amount": 800.00, "category": "Lodging"},
+        {"id": 10153, "title": "Park entry", "description": "Torres del Paine", "amount": 35.00, "category": "Permits"},
+        {"id": 10154, "title": "Trekking meals", "description": "Some included with refugios", "amount": 250.00, "category": "Food"}
+      ],
+      "notes": "Dream trip! The W Trek is supposed to be one of the most beautiful hikes in the world. February = summer in Patagonia."
+    },
+    {
+      "id": 1024,
+      "name": "Charleston Historic Tour",
+      "destination": "Charleston, SC",
+      "description": "Long weekend exploring historic district",
+      "startDate": "2026-04-10",
+      "endDate": "2026-04-13",
+      "status": "Committed",
+      "todos": [
+        {"id": 10155, "title": "Book hotel", "description": "Historic district", "completed": true},
+        {"id": 10156, "title": "Reserve plantation tour", "description": "Magnolia or Middleton", "completed": false},
+        {"id": 10157, "title": "Book dinner cruise", "description": "Harbor tour", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10158, "title": "Hotel", "description": "3 nights", "amount": 495.00, "category": "Lodging"},
+        {"id": 10159, "title": "Flights", "description": "Round-trip", "amount": 285.00, "category": "Transportation"},
+        {"id": 10160, "title": "Tours & activities", "description": "Plantations, harbor cruise", "amount": 180.00, "category": "Activities"}
+      ],
+      "notes": "Can't wait for Lowcountry cuisine! Shrimp and grits, she-crab soup, and sweet tea."
+    },
+    {
+      "id": 1025,
+      "name": "Vancouver Island Camping",
+      "destination": "Tofino, BC",
+      "description": "Week of beach camping and surfing",
+      "startDate": "2026-08-01",
+      "endDate": "2026-08-08",
+      "status": "Planning",
+      "todos": [
+        {"id": 10161, "title": "Reserve campsite", "description": "Green Point campground", "completed": false},
+        {"id": 10162, "title": "Rent surfboards", "description": "Week rental cheaper", "completed": false},
+        {"id": 10163, "title": "Book whale watching tour", "description": "Early August good for orcas", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10164, "title": "Campground", "description": "7 nights", "amount": 245.00, "category": "Lodging"},
+        {"id": 10165, "title": "Surfboard rental", "description": "Week rental for 2", "amount": 280.00, "category": "Activities"},
+        {"id": 10166, "title": "Whale watching", "description": "Zodiac tour", "amount": 120.00, "category": "Activities"},
+        {"id": 10167, "title": "Groceries", "description": "Camping food", "amount": 200.00, "category": "Food"}
+      ],
+      "notes": "Stoked to surf! Pacific Rim NP has amazing beaches. Want to see storm watching too if weather cooperates."
+    },
+    {
+      "id": 1026,
+      "name": "Peru Machu Picchu Trek",
+      "destination": "Cusco & Machu Picchu, Peru",
+      "description": "Inca Trail 4-day trek to Machu Picchu",
+      "startDate": "2027-09-10",
+      "endDate": "2027-09-18",
+      "status": "Planning",
+      "todos": [
+        {"id": 10168, "title": "Book Inca Trail permit", "description": "6 months in advance required!", "completed": false},
+        {"id": 10169, "title": "Book tour company", "description": "Includes porters & meals", "completed": false},
+        {"id": 10170, "title": "Get altitude sickness meds", "description": "Cusco is 11,000 ft", "completed": false},
+        {"id": 10171, "title": "Buy hiking boots", "description": "Break them in first", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10172, "title": "Flights", "description": "Round-trip to Lima + Cusco", "amount": 1100.00, "category": "Transportation"},
+        {"id": 10173, "title": "Inca Trail tour", "description": "4-day guided trek all-inclusive", "amount": 750.00, "category": "Activities"},
+        {"id": 10174, "title": "Hotels", "description": "Cusco before/after", "amount": 320.00, "category": "Lodging"},
+        {"id": 10175, "title": "Inca Trail permit", "description": "Included in tour", "amount": 0.00, "category": "Permits"}
+      ],
+      "notes": "Ultimate bucket list trek! Must acclimate in Cusco for 2-3 days first. September is dry season = perfect timing."
+    },
+    {
+      "id": 1027,
+      "name": "Savannah Ghost Tour Weekend",
+      "destination": "Savannah, GA",
+      "description": "Halloween weekend in America's most haunted city",
+      "startDate": "2026-10-30",
+      "endDate": "2026-11-01",
+      "status": "Planning",
+      "todos": [
+        {"id": 10176, "title": "Book historic B&B", "description": "Preferably haunted", "completed": false},
+        {"id": 10177, "title": "Reserve ghost tours", "description": "Book multiple tours", "completed": false},
+        {"id": 10178, "title": "Pack costumes", "description": "For Halloween night", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10179, "title": "B&B", "description": "2 nights", "amount": 320.00, "category": "Lodging"},
+        {"id": 10180, "title": "Ghost tours", "description": "3 different tours", "amount": 120.00, "category": "Activities"},
+        {"id": 10181, "title": "Gas", "description": "Road trip from Atlanta", "amount": 50.00, "category": "Transportation"}
+      ],
+      "notes": "Perfect timing for spooky vibes! Want to tour Bonaventure Cemetery and River Street."
+    },
+    {
+      "id": 1028,
+      "name": "Grand Canyon Rim-to-Rim",
+      "destination": "Grand Canyon, AZ",
+      "description": "Rim-to-rim day hike challenge",
+      "startDate": "2026-05-22",
+      "endDate": "2026-05-24",
+      "status": "Planning",
+      "todos": [
+        {"id": 10182, "title": "Reserve shuttle", "description": "Trans Canyon shuttle", "completed": false},
+        {"id": 10183, "title": "Train for distance", "description": "Build up to 20+ mile hikes", "completed": false},
+        {"id": 10184, "title": "Book lodging", "description": "North & South Rim", "completed": false},
+        {"id": 10185, "title": "Pack headlamp", "description": "Will start before dawn", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10186, "title": "Trans Canyon shuttle", "description": "One-way to start", "amount": 90.00, "category": "Transportation"},
+        {"id": 10187, "title": "Lodging", "description": "2 nights", "amount": 340.00, "category": "Lodging"},
+        {"id": 10188, "title": "Park entry", "description": "7-day pass", "amount": 35.00, "category": "Permits"}
+      ],
+      "notes": "This is going to be HARD. 24 miles, 5,800 ft elevation loss then 6,000 ft gain. May weather should be perfect."
+    },
+    {
+      "id": 1029,
+      "name": "Dublin & Irish Countryside",
+      "destination": "Dublin, Ireland",
+      "description": "St. Patrick's week in Ireland",
+      "startDate": "2027-03-14",
+      "endDate": "2027-03-21",
+      "status": "Planning",
+      "todos": [
+        {"id": 10189, "title": "Book Dublin hotel", "description": "Book way ahead for St. Patrick's", "completed": false},
+        {"id": 10190, "title": "Rent car", "description": "For countryside exploration", "completed": false},
+        {"id": 10191, "title": "Reserve Guinness Storehouse", "description": "Popular attraction", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10192, "title": "Flights", "description": "Round-trip", "amount": 850.00, "category": "Transportation"},
+        {"id": 10193, "title": "Hotels", "description": "6 nights", "amount": 900.00, "category": "Lodging"},
+        {"id": 10194, "title": "Car rental", "description": "4 days", "amount": 220.00, "category": "Transportation"},
+        {"id": 10195, "title": "Activities", "description": "Tours, pubs, castles", "amount": 350.00, "category": "Activities"}
+      ],
+      "notes": "St. Patrick's parade in Dublin! Then explore Cliffs of Moher, Ring of Kerry, and Galway."
+    },
+    {
+      "id": 1030,
+      "name": "Croatia Island Hopping",
+      "destination": "Split & Dalmatian Coast",
+      "description": "10 days sailing and exploring Croatian islands",
+      "startDate": "2027-07-01",
+      "endDate": "2027-07-11",
+      "status": "Planning",
+      "todos": [
+        {"id": 10196, "title": "Book sailboat charter", "description": "Crewed catamaran", "completed": false},
+        {"id": 10197, "title": "Get crew together", "description": "Need 6-8 people", "completed": false},
+        {"id": 10198, "title": "Research islands", "description": "Hvar, Korcula, Vis", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10199, "title": "Flights", "description": "Into Split", "amount": 950.00, "category": "Transportation"},
+        {"id": 10200, "title": "Sailboat charter share", "description": "Split 8 ways", "amount": 875.00, "category": "Transportation"},
+        {"id": 10201, "title": "Food & supplies", "description": "My share", "amount": 400.00, "category": "Food"}
+      ],
+      "notes": "Dream sailing trip! Crystal clear water, medieval towns, and amazing seafood. July = perfect weather."
+    },
+    {
+      "id": 1031,
+      "name": "Phoenix Spring Training",
+      "destination": "Phoenix, AZ",
+      "description": "Catch some Cactus League baseball games",
+      "startDate": "2026-03-18",
+      "endDate": "2026-03-22",
+      "status": "Planning",
+      "todos": [
+        {"id": 10202, "title": "Buy game tickets", "description": "3-4 games different stadiums", "completed": false},
+        {"id": 10203, "title": "Book hotel", "description": "Central Scottsdale", "completed": false},
+        {"id": 10204, "title": "Rent car", "description": "Stadium hopping", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10205, "title": "Game tickets", "description": "4 games", "amount": 160.00, "category": "Activities"},
+        {"id": 10206, "title": "Hotel", "description": "4 nights", "amount": 440.00, "category": "Lodging"},
+        {"id": 10207, "title": "Car rental", "description": "5 days", "amount": 225.00, "category": "Transportation"}
+      ],
+      "notes": "Love spring training! Intimate stadiums, perfect weather, and easier to get autographs."
+    },
+    {
+      "id": 1032,
+      "name": "Australia Great Barrier Reef",
+      "destination": "Cairns, Australia",
+      "description": "Two weeks exploring Queensland and the reef",
+      "startDate": "2027-11-05",
+      "endDate": "2027-11-19",
+      "status": "Planning",
+      "todos": [
+        {"id": 10208, "title": "Book flights", "description": "Long haul to Australia", "completed": false},
+        {"id": 10209, "title": "Get diving certification", "description": "Open water course", "completed": false},
+        {"id": 10210, "title": "Book liveaboard dive trip", "description": "3-4 days on reef", "completed": false},
+        {"id": 10211, "title": "Research Daintree Rainforest", "description": "Oldest rainforest on Earth", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10212, "title": "Flights", "description": "Round-trip to Cairns", "amount": 1650.00, "category": "Transportation"},
+        {"id": 10213, "title": "Liveaboard dive trip", "description": "3 nights all-inclusive", "amount": 1200.00, "category": "Activities"},
+        {"id": 10214, "title": "Hotels", "description": "10 nights", "amount": 1300.00, "category": "Lodging"},
+        {"id": 10215, "title": "Car rental", "description": "Exploring coast", "amount": 450.00, "category": "Transportation"}
+      ],
+      "notes": "Bucket list! Great Barrier Reef before it's gone. November = summer, reef conditions should be excellent."
+    },
+    {
+      "id": 1033,
+      "name": "MEGA PLANNING - European Summer (Heavy Todos)",
+      "destination": "London, Paris, Amsterdam, Berlin",
+      "description": "Epic 4-week European adventure hitting major cities",
+      "startDate": "2027-06-01",
+      "endDate": "2027-06-30",
+      "status": "Planning",
+      "todos": [
+        {"id": 10216, "title": "Book flights", "description": "Multi-city: into London, out of Berlin", "completed": false},
+        {"id": 10217, "title": "Apply for passport renewal", "description": "Current expires soon", "completed": false},
+        {"id": 10218, "title": "Book London hotel", "description": "Week 1: June 1-7", "completed": false},
+        {"id": 10219, "title": "Reserve West End show tickets", "description": "Book months ahead", "completed": false},
+        {"id": 10220, "title": "Book Eurostar to Paris", "description": "June 7 departure", "completed": false},
+        {"id": 10221, "title": "Book Paris apartment", "description": "Week 2: June 7-14", "completed": false},
+        {"id": 10222, "title": "Reserve Louvre time slot", "description": "Advance booking required", "completed": false},
+        {"id": 10223, "title": "Reserve Eiffel Tower tickets", "description": "Summit access if possible", "completed": false},
+        {"id": 10224, "title": "Book Paris restaurant reservations", "description": "L'Ami Jean, Septime", "completed": false},
+        {"id": 10225, "title": "Book train to Amsterdam", "description": "June 14 Thalys train", "completed": false},
+        {"id": 10226, "title": "Book Amsterdam hotel", "description": "Week 3: June 14-21", "completed": false},
+        {"id": 10227, "title": "Reserve Anne Frank House", "description": "Books up months ahead", "completed": false},
+        {"id": 10228, "title": "Book canal boat tour", "description": "Evening cruise", "completed": false},
+        {"id": 10229, "title": "Book Rijksmuseum tickets", "description": "Time slot reservation", "completed": false},
+        {"id": 10230, "title": "Book train to Berlin", "description": "June 21 ICE train", "completed": false},
+        {"id": 10231, "title": "Book Berlin hotel", "description": "Week 4: June 21-28", "completed": false},
+        {"id": 10232, "title": "Book Berlin wall tour", "description": "Historical walking tour", "completed": false},
+        {"id": 10233, "title": "Reserve Reichstag dome", "description": "Free but must reserve", "completed": false},
+        {"id": 10234, "title": "Get European SIM card", "description": "For data/navigation", "completed": false},
+        {"id": 10235, "title": "Download offline maps", "description": "All 4 cities", "completed": false},
+        {"id": 10236, "title": "Notify credit cards", "description": "Travel alert for Europe", "completed": false},
+        {"id": 10237, "title": "Get travel insurance", "description": "4-week trip coverage", "completed": false},
+        {"id": 10238, "title": "Pack light", "description": "One carry-on for whole trip", "completed": false},
+        {"id": 10239, "title": "Learn basic phrases", "description": "French, Dutch, German greetings", "completed": false},
+        {"id": 10240, "title": "Research day trips", "description": "Versailles, Keukenhof, Potsdam", "completed": false},
+        {"id": 10241, "title": "Book Versailles tour", "description": "Skip-the-line guided", "completed": false},
+        {"id": 10242, "title": "Print all confirmations", "description": "Hotels, trains, tickets", "completed": false},
+        {"id": 10243, "title": "Exchange some currency", "description": "Euros for emergencies", "completed": false},
+        {"id": 10244, "title": "Set up VPN", "description": "For public WiFi security", "completed": false},
+        {"id": 10245, "title": "Backup important documents", "description": "Scan passport, cards", "completed": false},
+        {"id": 10246, "title": "Buy universal adapter", "description": "European outlets", "completed": false},
+        {"id": 10247, "title": "Get COVID/travel vaccinations", "description": "Check requirements", "completed": false},
+        {"id": 10248, "title": "Research bike rentals", "description": "Amsterdam bike culture", "completed": false},
+        {"id": 10249, "title": "Book luggage storage", "description": "For last day in Berlin", "completed": false},
+        {"id": 10250, "title": "Download translation apps", "description": "Google Translate offline", "completed": false},
+        {"id": 10251, "title": "Research London tube system", "description": "Get Oyster card?", "completed": false},
+        {"id": 10252, "title": "Plan Paris metro routes", "description": "Download app", "completed": false},
+        {"id": 10253, "title": "Research Berlin nightlife", "description": "Club scene recommendations", "completed": false},
+        {"id": 10254, "title": "Pack rain jacket", "description": "June can be rainy", "completed": false},
+        {"id": 10255, "title": "Book airport transfer Berlin", "description": "To airport June 30", "completed": false},
+        {"id": 10256, "title": "Set up roaming plan", "description": "Or buy local SIMs", "completed": false},
+        {"id": 10257, "title": "Research food markets", "description": "Borough, Marche Bastille, Albert Cuyp", "completed": false},
+        {"id": 10258, "title": "Book Amsterdam coffeeshop tour", "description": "Educational experience", "completed": false},
+        {"id": 10259, "title": "Research Berlin street art", "description": "East Side Gallery", "completed": false},
+        {"id": 10260, "title": "Plan budget", "description": "Daily spending limits", "completed": false},
+        {"id": 10261, "title": "Book Globe Theatre tickets", "description": "Shakespeare in London", "completed": false},
+        {"id": 10262, "title": "Research Notre Dame status", "description": "Check if reopened", "completed": false},
+        {"id": 10263, "title": "Book Van Gogh Museum", "description": "Time slot required", "completed": false},
+        {"id": 10264, "title": "Research beer gardens", "description": "Berlin summer tradition", "completed": false},
+        {"id": 10265, "title": "Plan laundry stops", "description": "Laundromats in each city", "completed": false},
+        {"id": 10266, "title": "Download city guides", "description": "Rick Steves podcasts", "completed": false},
+        {"id": 10267, "title": "Research outlet shopping", "description": "La Vallee Village near Paris", "completed": false},
+        {"id": 10268, "title": "Book Montmartre tour", "description": "Sacre-Coeur area", "completed": false},
+        {"id": 10269, "title": "Research Berlin lakes", "description": "Swimming spots", "completed": false},
+        {"id": 10270, "title": "Plan photography gear", "description": "Camera, extra batteries", "completed": false},
+        {"id": 10271, "title": "Create daily itineraries", "description": "Flexible but structured", "completed": false},
+        {"id": 10272, "title": "Research emergency contacts", "description": "Embassies in each city", "completed": false},
+        {"id": 10273, "title": "Book return flight confirmation", "description": "Berlin to home June 30", "completed": false},
+        {"id": 10274, "title": "Set up travel blog", "description": "Share updates with family", "completed": false},
+        {"id": 10275, "title": "Pack first aid kit", "description": "Basic meds & bandages", "completed": false},
+        {"id": 10276, "title": "Research tipping customs", "description": "Different in each country", "completed": false},
+        {"id": 10277, "title": "Book champagne tour", "description": "Day trip from Paris", "completed": false},
+        {"id": 10278, "title": "Research Berlin transportation", "description": "U-Bahn & S-Bahn system", "completed": false},
+        {"id": 10279, "title": "Plan souvenirs list", "description": "Gifts for family", "completed": false},
+        {"id": 10280, "title": "Download music playlists", "description": "For train rides", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10281, "title": "Flights", "description": "Multi-city round-trip", "amount": 1450.00, "category": "Transportation"},
+        {"id": 10282, "title": "Hotels & accommodation", "description": "28 nights total", "amount": 3920.00, "category": "Lodging"},
+        {"id": 10283, "title": "Train tickets", "description": "Eurostar, Thalys, ICE", "amount": 450.00, "category": "Transportation"},
+        {"id": 10284, "title": "Museum tickets", "description": "All major attractions", "amount": 380.00, "category": "Activities"},
+        {"id": 10285, "title": "Tours & activities", "description": "Guided tours, shows", "amount": 650.00, "category": "Activities"},
+        {"id": 10286, "title": "Food budget", "description": "30 days estimate", "amount": 1800.00, "category": "Food"},
+        {"id": 10287, "title": "Local transportation", "description": "Metro, tram, bus", "amount": 250.00, "category": "Transportation"},
+        {"id": 10288, "title": "Travel insurance", "description": "4-week comprehensive", "amount": 185.00, "category": "Other"}
+      ],
+      "notes": "This is THE trip! Been planning for years. London museums, Paris romance, Amsterdam canals, Berlin history.\n\nMust-sees:\n- London: British Museum, Tower of London, Camden Market, afternoon tea\n- Paris: Louvre, Musee d'Orsay, Sainte-Chapelle, Latin Quarter cafes\n- Amsterdam: Anne Frank House, Vondelpark, canal walks, bike everywhere\n- Berlin: Brandenburg Gate, Museum Island, Checkpoint Charlie, Tiergarten\n\nBudget note: This is a big trip, probably $9,000-10,000 all-in with shopping & extras. Worth every penny!"
+    },
+    {
+      "id": 1034,
+      "name": "RESEARCH TRIP - Antarctica Expedition (Heavy Notes & Expenses)",
+      "destination": "Antarctic Peninsula",
+      "description": "Once-in-a-lifetime expedition cruise to Antarctica",
+      "startDate": "2028-02-10",
+      "endDate": "2028-02-25",
+      "status": "Planning",
+      "todos": [
+        {"id": 10289, "title": "Book expedition cruise", "description": "Book 18-24 months ahead", "completed": false},
+        {"id": 10290, "title": "Book flights to Ushuaia", "description": "Gateway to Antarctica", "completed": false},
+        {"id": 10291, "title": "Get expedition gear", "description": "Extreme cold weather clothing", "completed": false},
+        {"id": 10292, "title": "Take seasickness meds", "description": "Drake Passage is rough", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10293, "title": "Expedition cruise", "description": "14-day all-inclusive", "amount": 12500.00, "category": "Transportation"},
+        {"id": 10294, "title": "Flights to Ushuaia", "description": "Multiple connections", "amount": 1850.00, "category": "Transportation"},
+        {"id": 10295, "title": "Hotel in Ushuaia", "description": "2 nights before/after", "amount": 420.00, "category": "Lodging"},
+        {"id": 10296, "title": "Expedition parka rental", "description": "Provided by cruise company", "amount": 0.00, "category": "Other"},
+        {"id": 10297, "title": "Waterproof pants", "description": "Must buy", "amount": 185.00, "category": "Other"},
+        {"id": 10298, "title": "Insulated boots", "description": "Muck boots recommended", "amount": 220.00, "category": "Other"},
+        {"id": 10299, "title": "Base layers", "description": "Merino wool", "amount": 180.00, "category": "Other"},
+        {"id": 10300, "title": "Warm gloves", "description": "Multiple pairs", "amount": 95.00, "category": "Other"},
+        {"id": 10301, "title": "Neck gaiter & hat", "description": "Face protection", "amount": 65.00, "category": "Other"},
+        {"id": 10302, "title": "Sunglasses & sunscreen", "description": "UV protection critical", "amount": 85.00, "category": "Other"},
+        {"id": 10303, "title": "Camera cold weather gear", "description": "Extra batteries", "amount": 150.00, "category": "Other"},
+        {"id": 10304, "title": "Travel insurance", "description": "Evacuation coverage required", "amount": 450.00, "category": "Other"},
+        {"id": 10305, "title": "Tips for crew", "description": "Suggested $15/day", "amount": 210.00, "category": "Other"},
+        {"id": 10306, "title": "Pre-trip medical exam", "description": "Required by cruise line", "amount": 120.00, "category": "Other"},
+        {"id": 10307, "title": "Medications", "description": "Seasickness, altitude", "amount": 75.00, "category": "Other"},
+        {"id": 10308, "title": "Waterproof dry bags", "description": "For zodiac landings", "amount": 45.00, "category": "Other"},
+        {"id": 10309, "title": "Moisturizer & lip balm", "description": "Extreme dryness", "amount": 35.00, "category": "Other"},
+        {"id": 10310, "title": "Phone waterproof case", "description": "For deck photos", "amount": 40.00, "category": "Other"},
+        {"id": 10311, "title": "Portable charger", "description": "Long days photographing", "amount": 65.00, "category": "Other"},
+        {"id": 10312, "title": "Binoculars", "description": "Wildlife viewing", "amount": 195.00, "category": "Other"},
+        {"id": 10313, "title": "Journal & pens", "description": "Document the experience", "amount": 25.00, "category": "Other"},
+        {"id": 10314, "title": "Snacks for ship", "description": "Favorite treats", "amount": 60.00, "category": "Food"},
+        {"id": 10315, "title": "Motion sickness bands", "description": "Non-pharmaceutical option", "amount": 18.00, "category": "Other"},
+        {"id": 10316, "title": "Luggage tags & locks", "description": "For expedition luggage", "amount": 30.00, "category": "Other"},
+        {"id": 10317, "title": "USB drives", "description": "Backup all photos", "amount": 45.00, "category": "Other"},
+        {"id": 10318, "title": "Expedition book", "description": "Antarctica field guide", "amount": 32.00, "category": "Other"},
+        {"id": 10319, "title": "Thermal underwear", "description": "Multiple sets", "amount": 120.00, "category": "Other"},
+        {"id": 10320, "title": "Wool socks", "description": "At least 6 pairs", "amount": 90.00, "category": "Other"},
+        {"id": 10321, "title": "Headlamp", "description": "For early morning excursions", "amount": 45.00, "category": "Other"},
+        {"id": 10322, "title": "Trekking poles", "description": "For ice walking", "amount": 85.00, "category": "Other"},
+        {"id": 10323, "title": "Backpack", "description": "Waterproof day pack", "amount": 110.00, "category": "Other"},
+        {"id": 10324, "title": "Hand & toe warmers", "description": "Disposable heat packs", "amount": 40.00, "category": "Other"}
+      ],
+      "notes": "ANTARCTICA - THE ULTIMATE ADVENTURE!\n\nThis is my absolute dream trip. I've been saving for this for 5+ years. Antarctica represents the last great wilderness on Earth, and I need to see it before climate change alters it forever.\n\n## The Expedition\n\nThe cruise departs from Ushuaia, Argentina (the southernmost city in the world). We'll cross the infamous Drake Passage - 2 days of potentially rough seas before reaching the Antarctic Peninsula. The ship has ice-strengthened hull and carries about 120 passengers.\n\n## What I'll See\n\nWildlife: Penguins (Gentoo, Chinstrap, Adelie), Humpback & Minke whales, Leopard seals, Weddell seals, Antarctic terns, Skuas, Petrels. The penguin colonies alone make this worth it - thousands of penguins going about their lives, completely unafraid of humans.\n\nLandscapes: Massive icebergs (some the size of buildings), glaciers calving into the sea, pristine snow-covered mountains, channels of impossibly blue water. The light in Antarctica is unlike anywhere else - 20+ hours of daylight in February.\n\n## Daily Activities\n\nZodiac Cruises: Small inflatable boat excursions to get close to icebergs, glaciers, and wildlife. These happen 1-2 times per day, weather permitting.\n\nLandings: Step foot on the Antarctic continent itself! We'll visit research stations, historic expedition huts, and remote landing sites. Each passenger is limited to 100 people ashore at once (Antarctic Treaty regulations).\n\nKayaking Option: I might pay extra for the kayaking add-on. Paddling among icebergs in complete silence sounds transcendent.\n\nLectures: Onboard naturalists, glaciologists, and historians give presentations about Antarctic science, exploration history (Shackleton! Scott! Amundsen!), and conservation.\n\n## Practical Considerations\n\nThe Drake Passage: Known as one of the roughest bodies of water on Earth. I'm definitely bringing prescription seasickness medication. The crossing takes 2 days each way. People say \"Drake Shake\" vs \"Drake Lake\" depending on conditions. I'm preparing for the worst.\n\nClothing: Layering is everything. Base layers (merino wool), mid-layers (fleece), outer layer (waterproof shell). The ship provides a heavy expedition parka, but I need to bring waterproof pants. Temps range from 20°F to 40°F, but wind chill makes it feel much colder.\n\nPhotography: This is a once-in-a-lifetime photography opportunity. Need extra camera batteries (they drain fast in cold), lens cloth, and waterproof protection. The light at \"golden hour\" (which can be midnight!) is supposed to be magical.\n\nEnvironment: Antarctica is protected by international treaty. Strict biosecurity measures - all clothing must be vacuumed and decontaminated before landing. No touching wildlife, stay 15 feet away from penguins, 25 feet from seals. Leave no trace. Take only photos.\n\n## Why Now?\n\nClimate change is affecting Antarctica faster than almost anywhere on Earth. Ice shelves are collapsing, glaciers are retreating. I want to see this pristine wilderness while it still exists in its current form. It's also about fulfilling a lifelong dream - ever since I was a kid reading about Antarctic explorers, I've wanted to go there.\n\n## Cost Reality\n\nThis trip is EXPENSIVE. Total budget: approximately $18,000-20,000 including everything (cruise, flights, gear, insurance, misc). But this is truly once-in-a-lifetime. I'm 37 years old now - if not now, when? The value of experiences over things.\n\nThe expedition cruise alone is $12,500 for a triple cabin (sharing with 2 others). Single supplement would add $8,000! Twin cabin is $14,500 per person. I'm going with the triple to save money.\n\nFlights to Ushuaia are complex - usually connecting through Buenos Aires, sometimes Santiago. Figure $1,800-2,200 depending on timing.\n\nGear: At least $1,500-2,000 for proper cold-weather gear, most of which I don't currently own. Some can be rented, but waterproof pants, boots, and base layers need to be purchased.\n\n## Ship Life\n\nThe ship is expedition-style, not a luxury cruise liner. Comfortable but not fancy. Cabins are small but functional. All meals included (and supposedly very good). Bar is extra. Focus is on the destination and the experience, not shipboard amenities.\n\nThere's a mud room where we'll store our expedition gear and boots. A library with Antarctic books. Lounge areas for relaxing and watching for wildlife. The bridge is usually open so passengers can visit and talk to the captain.\n\n## Conservation & Impact\n\nI'm aware of the irony: flying halfway around the world and taking a diesel-powered ship to visit a pristine wilderness. The carbon footprint is significant. My rationalization: I'll offset carbon emissions, and witnessing Antarctica's beauty firsthand will make me a better advocate for climate action. Seeing something in person creates a connection that photos never can.\n\nAlso, Antarctic tourism is actually well-regulated and minimal impact compared to other threats (illegal fishing, climate change, krill harvesting). Passengers become ambassadors for the continent.\n\n## After the Trip\n\nI plan to give presentations (maybe at library or school) about the experience. Share photos widely. Write about it. Support organizations working on Antarctic conservation. This trip will change me - everyone who goes to Antarctica says the same thing.\n\n## Bottom Line\n\nThis is the most expensive trip I'll ever take. It's also the most important one. Antarctica is the ultimate adventure - the end of the Earth, the last great wilderness, a place of overwhelming beauty and power. I'm doing this."
+    },
+    {
+      "id": 1035,
+      "name": "Acadia National Park Fall Colors",
+      "destination": "Bar Harbor, ME",
+      "description": "Peak fall foliage in Acadia",
+      "startDate": "2026-10-15",
+      "endDate": "2026-10-18",
+      "status": "Planning",
+      "todos": [
+        {"id": 10325, "title": "Book hotel early", "description": "Peak season for foliage", "completed": false},
+        {"id": 10326, "title": "Check foliage reports", "description": "Time it perfectly", "completed": false},
+        {"id": 10327, "title": "Plan sunrise at Cadillac Mountain", "description": "First sunrise in USA", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10328, "title": "Hotel", "description": "3 nights", "amount": 510.00, "category": "Lodging"},
+        {"id": 10329, "title": "Park entry", "description": "7-day pass", "amount": 35.00, "category": "Permits"},
+        {"id": 10330, "title": "Gas", "description": "Road trip from Boston", "amount": 75.00, "category": "Transportation"}
+      ],
+      "notes": "October is THE month for fall colors in Acadia. The mix of ocean, mountains, and autumn leaves is supposed to be spectacular."
+    },
+    {
+      "id": 1036,
+      "name": "Wine Country Weekend - Napa",
+      "destination": "Napa Valley, CA",
+      "description": "Wine tasting tour with friends",
+      "startDate": "2026-09-11",
+      "endDate": "2026-09-13",
+      "status": "Planning",
+      "todos": [
+        {"id": 10331, "title": "Book wine tour", "description": "Guided tour with transportation", "completed": false},
+        {"id": 10332, "title": "Book B&B", "description": "Walkable to downtown Napa", "completed": false},
+        {"id": 10333, "title": "Make dinner reservations", "description": "French Laundry? LOL probably not", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10334, "title": "B&B", "description": "2 nights", "amount": 420.00, "category": "Lodging"},
+        {"id": 10335, "title": "Wine tour", "description": "Full day guided", "amount": 185.00, "category": "Activities"},
+        {"id": 10336, "title": "Meals", "description": "Fancy dinners", "amount": 280.00, "category": "Food"}
+      ],
+      "notes": "September is harvest season = perfect timing! Moderate crowds and beautiful weather."
+    },
+    {
+      "id": 1037,
+      "name": "Utah Mighty Five Road Trip",
+      "destination": "Southern Utah National Parks",
+      "description": "Epic road trip hitting all 5 Utah national parks",
+      "startDate": "2027-04-15",
+      "endDate": "2027-04-25",
+      "status": "Planning",
+      "todos": [
+        {"id": 10337, "title": "Book campsites", "description": "Zion, Bryce, Capitol Reef, Arches, Canyonlands", "completed": false},
+        {"id": 10338, "title": "Plan driving route", "description": "Efficient loop", "completed": false},
+        {"id": 10339, "title": "Get Utah parks pass", "description": "America the Beautiful", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10340, "title": "Car rental", "description": "SUV for 10 days", "amount": 650.00, "category": "Transportation"},
+        {"id": 10341, "title": "Campsites", "description": "9 nights various parks", "amount": 270.00, "category": "Lodging"},
+        {"id": 10342, "title": "Annual parks pass", "description": "Covers all 5 parks", "amount": 80.00, "category": "Permits"},
+        {"id": 10343, "title": "Gas", "description": "~1000 miles estimate", "amount": 150.00, "category": "Transportation"},
+        {"id": 10344, "title": "Groceries", "description": "Camping food", "amount": 200.00, "category": "Food"}
+      ],
+      "notes": "The Mighty Five: Zion → Bryce → Capitol Reef → Arches → Canyonlands. Spring is perfect timing - not too hot, fewer crowds than summer."
+    },
+    {
+      "id": 1038,
+      "name": "Morocco Adventure",
+      "destination": "Marrakech & Sahara Desert",
+      "description": "Exploring souks, kasbahs, and desert camping",
+      "startDate": "2027-10-05",
+      "endDate": "2027-10-15",
+      "status": "Planning",
+      "todos": [
+        {"id": 10345, "title": "Book riad in Marrakech", "description": "Traditional Moroccan hotel", "completed": false},
+        {"id": 10346, "title": "Book Sahara desert tour", "description": "2-night camel trek", "completed": false},
+        {"id": 10347, "title": "Get travel vaccinations", "description": "Hep A & typhoid", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10348, "title": "Flights", "description": "Round-trip to Marrakech", "amount": 980.00, "category": "Transportation"},
+        {"id": 10349, "title": "Riads & hotels", "description": "9 nights", "amount": 720.00, "category": "Lodging"},
+        {"id": 10350, "title": "Desert tour", "description": "3-day with camping", "amount": 280.00, "category": "Activities"},
+        {"id": 10351, "title": "Food estimate", "description": "Tagines & mint tea", "amount": 300.00, "category": "Food"}
+      ],
+      "notes": "Want to experience the chaos of Jemaa el-Fnaa square, shop in the souks, sleep under stars in the Sahara. October = good weather."
+    },
+    {
+      "id": 1039,
+      "name": "Vermont Fall Foliage Bike Tour",
+      "destination": "Stowe, VT",
+      "description": "Cycling through autumn colors",
+      "startDate": "2026-09-24",
+      "endDate": "2026-09-27",
+      "status": "Planning",
+      "todos": [
+        {"id": 10352, "title": "Book bike tour company", "description": "Supported tour with van", "completed": false},
+        {"id": 10353, "title": "Book inn", "description": "Charming B&B", "completed": false},
+        {"id": 10354, "title": "Train for hills", "description": "Vermont is hilly!", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10355, "title": "Bike tour", "description": "3-day guided", "amount": 495.00, "category": "Activities"},
+        {"id": 10356, "title": "Inn", "description": "3 nights with breakfast", "amount": 480.00, "category": "Lodging"},
+        {"id": 10357, "title": "Flights", "description": "To Burlington", "amount": 295.00, "category": "Transportation"}
+      ],
+      "notes": "Peak foliage, country roads, covered bridges, and farm stands. Perfect fall weekend."
+    },
+    {
+      "id": 1040,
+      "name": "Olympic National Park",
+      "destination": "Port Angeles, WA",
+      "description": "Rain forest, mountains, and Pacific coast",
+      "startDate": "2026-06-05",
+      "endDate": "2026-06-09",
+      "status": "Planning",
+      "todos": [
+        {"id": 10358, "title": "Book cabin", "description": "Near Lake Crescent", "completed": false},
+        {"id": 10359, "title": "Plan hiking routes", "description": "Hoh Rainforest, Hurricane Ridge", "completed": false},
+        {"id": 10360, "title": "Check road conditions", "description": "Hurricane Ridge can have snow", "completed": false}
+      ],
+      "expenses": [
+        {"id": 10361, "title": "Cabin rental", "description": "4 nights", "amount": 560.00, "category": "Lodging"},
+        {"id": 10362, "title": "Park entry", "description": "7-day pass", "amount": 30.00, "category": "Permits"},
+        {"id": 10363, "title": "Gas", "description": "Seattle to Port Angeles", "amount": 65.00, "category": "Transportation"}
+      ],
+      "notes": "Three ecosystems in one park! Temperate rainforest, alpine peaks, and rugged coastline. June should be drier than usual."
+    },
+    {
+      "id": 1041,
+      "name": "Future Trip Idea - New Zealand",
+      "destination": "North & South Islands, NZ",
+      "description": "Epic 3-week New Zealand adventure - Lord of the Rings filming locations, hiking, adventure sports",
+      "startDate": "",
+      "endDate": "",
+      "status": "Planning",
+      "todos": [
+        {"id": 10364, "title": "Start saving", "description": "This will be expensive", "completed": false},
+        {"id": 10365, "title": "Research best season", "description": "Nov-March = summer", "completed": false}
+      ],
+      "expenses": [],
+      "notes": "Someday trip: Queenstown bungy jumping, Milford Sound, Hobbiton, Abel Tasman, hot springs, wine regions. Need 3+ weeks to do it right."
+    },
+    {
+      "id": 1042,
+      "name": "Future Trip - Vietnam & Cambodia",
+      "destination": "Hanoi, Hoi An, Angkor Wat",
+      "description": "Southeast Asia adventure - temples, street food, history",
+      "startDate": "",
+      "endDate": "",
+      "status": "Planning",
+      "todos": [],
+      "expenses": [],
+      "notes": "Angkor Wat at sunrise is bucket list. Also: Ha Long Bay, Hoi An lantern festival, Hanoi street food tour, Mekong Delta."
+    },
+    {
+      "id": 1043,
+      "name": "Possible - Norwegian Fjords Cruise",
+      "destination": "Bergen to North Cape, Norway",
+      "description": "Summer cruise through dramatic fjords",
+      "startDate": "",
+      "endDate": "",
+      "status": "Planning",
+      "todos": [],
+      "expenses": [],
+      "notes": "Midnight sun in summer! Geirangerfjord, Bergen fish market, Lofoten Islands. Maybe 2028?"
+    },
+    {
+      "id": 1044,
+      "name": "Maybe Someday - African Safari",
+      "destination": "Kenya or Tanzania",
+      "description": "Wildlife safari in Serengeti or Masai Mara",
+      "startDate": "",
+      "endDate": "",
+      "status": "Planning",
+      "todos": [
+        {"id": 10366, "title": "Research safari companies", "description": "Read reviews carefully", "completed": false}
+      ],
+      "expenses": [],
+      "notes": "See the Big Five: lion, elephant, buffalo, leopard, rhino. Migration season would be incredible. Expensive but worth it."
+    },
+    {
+      "id": 1045,
+      "name": "Idea - Galapagos Islands",
+      "destination": "Galapagos Archipelago, Ecuador",
+      "description": "Darwin's islands - unique wildlife up close",
+      "startDate": "",
+      "endDate": "",
+      "status": "Planning",
+      "todos": [],
+      "expenses": [],
+      "notes": "Giant tortoises, marine iguanas, blue-footed boobies! Snorkel with sea lions. Need to book far ahead, very regulated."
+    },
+    {
+      "id": 1046,
+      "name": "Random - Weekend Camping Trip",
+      "destination": "TBD - somewhere nearby",
+      "description": "Quick weekend getaway to decompress",
+      "startDate": "",
+      "endDate": "",
+      "status": "Planning",
+      "todos": [],
+      "expenses": [],
+      "notes": "Just need to get outside more often. Maybe state park or national forest. Keep it simple."
+    },
+    {
+      "id": 1047,
+      "name": "Las Vegas Convention Trip - Canceled",
+      "destination": "Las Vegas, NV",
+      "description": "Web summit conference",
+      "startDate": "2025-01-15",
+      "endDate": "2025-01-18",
+      "status": "Canceled",
+      "todos": [
+        {"id": 10367, "title": "Cancel hotel reservation", "description": "Get refund", "completed": true}
+      ],
+      "expenses": [],
+      "notes": "Conference got rescheduled. Couldn't make new dates work. Oh well."
+    },
+    {
+      "id": 1048,
+      "name": "Visit Cousin - Denver - Canceled",
+      "destination": "Denver, CO",
+      "description": "Weekend visiting family",
+      "startDate": "2024-11-22",
+      "endDate": "2024-11-24",
+      "status": "Canceled",
+      "todos": [],
+      "expenses": [],
+      "notes": "They had to cancel - family emergency. Will reschedule eventually."
+    },
+    {
+      "id": 1049,
+      "name": "Mexico Beach Resort - CANCELED",
+      "destination": "Playa del Carmen, Mexico",
+      "description": "All-inclusive beach week",
+      "startDate": "2024-03-10",
+      "endDate": "2024-03-17",
+      "status": "Canceled",
+      "todos": [],
+      "expenses": [
+        {"id": 10368, "title": "Cancellation fee", "description": "Non-refundable deposit", "amount": 250.00, "category": "Other"}
+      ],
+      "notes": "Had to cancel due to work conflict. Lost deposit but that's life. Hopefully can go another time."
+    },
+    {
+      "id": 1050,
+      "name": "Florida Keys Diving",
+      "destination": "Key Largo, FL",
+      "description": "Long weekend scuba diving",
+      "startDate": "2025-05-01",
+      "endDate": "2025-05-04",
+      "status": "Completed",
+      "todos": [
+        {"id": 10369, "title": "Book dive trips", "description": "2-tank morning dives", "completed": true},
+        {"id": 10370, "title": "Check gear", "description": "Verify cert card", "completed": true}
+      ],
+      "expenses": [
+        {"id": 10371, "title": "Hotel", "description": "3 nights", "amount": 420.00, "category": "Lodging"},
+        {"id": 10372, "title": "Dive trips", "description": "3 days of 2-tank dives", "amount": 450.00, "category": "Activities"},
+        {"id": 10373, "title": "Rental car", "description": "From Miami", "amount": 195.00, "category": "Transportation"}
+      ],
+      "notes": "Amazing diving! Saw nurse sharks, giant grouper, sea turtles, and a moray eel. Molasses Reef was my favorite site."
+    }
+  ]
+}

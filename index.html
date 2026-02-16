@@ -1,0 +1,4031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Hub - Personal Travel Planning</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+        <div class="header__content">
+          <div class="header__brand">
+            <h1 class="header__title">
+              Travel Hub
+              <span class="header__version">v1.0.0</span>
+            </h1>
+            <span v-if="unsavedChanges" class="header__unsaved">• Unsaved changes</span>
+          </div>
+          <div class="header__collection">
+            <span class="collection-name" :title="currentCollectionName">
+              {{ currentCollectionName }}
+              <span v-if="unsavedChanges" class="collection-unsaved-indicator">●</span>
+            </span>
+          </div>
+          <div class="header__actions">
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm theme-toggle"
+              @click="toggleTheme"
+              aria-label="Toggle theme"
+              title="Toggle theme"
+            >
+              <!-- Show moon icon in light mode (to indicate "switch to dark") -->
+              <svg v-if="theme === 'light'" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 8.5C13.9 11.5 11.4 14 8.4 14C5.4 14 3 11.6 3 8.6C3 5.6 5.5 3.1 8.5 3C8.3 3.3 8.2 3.6 8.2 4C8.2 5.7 9.6 7.1 11.3 7.1C11.7 7.1 12 7 12.3 6.8C12.9 7.6 13.3 8.5 14 8.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <!-- Show sun icon in dark mode (to indicate "switch to light") -->
+              <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 11.5C9.933 11.5 11.5 9.933 11.5 8C11.5 6.067 9.933 4.5 8 4.5C6.067 4.5 4.5 6.067 4.5 8C4.5 9.933 6.067 11.5 8 11.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 1V2M8 14V15M15 8H14M2 8H1M12.5 12.5L11.79 11.79M4.21 4.21L3.5 3.5M12.5 3.5L11.79 4.21M4.21 11.79L3.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button type="button" class="btn btn--secondary btn--sm" @click="newCollection">New Collection</button>
+            <button type="button" class="btn btn--secondary btn--sm" @click="loadExampleData" title="Load sample trips to explore features">Load Example Data</button>
+            <button type="button" class="btn btn--secondary btn--sm" @click="triggerFileOpen">Open</button>
+            <button type="button" class="btn btn--secondary btn--sm" @click="saveJSON">Save</button>
+            <input
+              type="file"
+              ref="fileInput"
+              @change="openJSON"
+              accept=".json"
+              style="display: none;"
+            >
+            <button type="button" class="btn btn--primary btn--sm" @click="openNewTrip">+ New Trip</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Stats Dashboard -->
+    <section class="stats">
+      <div class="container">
+        <div class="stats__grid">
+          <div class="stat-card">
+            <div class="stat-card__label">Total Trips</div>
+            <div class="stat-card__value">{{ stats.total }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__label">Upcoming</div>
+            <div class="stat-card__value">{{ stats.upcoming }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__label">Total Budget</div>
+            <div class="stat-card__value">{{ formatCurrency(stats.budget) }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__label">Completed</div>
+            <div class="stat-card__value">{{ stats.completed }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="container">
+        <div class="toolbar__content">
+          <div class="toolbar__search">
+            <input
+              id="tripSearch"
+              type="text"
+              class="input"
+              placeholder="Search trips by name or destination..."
+              v-model="searchQuery"
+            >
+          </div>
+          <div class="toolbar__actions">
+            <div class="btn-group">
+              <button
+                type="button"
+                class="btn btn--sm"
+                :class="{ 'active': currentView === 'list' }"
+                @click="currentView = 'list'"
+              >
+                List
+              </button>
+              <button
+                type="button"
+                class="btn btn--sm"
+                :class="{ 'active': currentView === 'calendar' }"
+                @click="currentView = 'calendar'"
+              >
+                Calendar
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Filter & Sort Row -->
+        <div class="toolbar__filters">
+          <div class="filter-chips">
+            <button
+              type="button"
+              class="filter-chip"
+              :class="{ 'filter-chip--active': statusFilter === 'All' }"
+              @click="setStatusFilter('All')"
+            >
+              All
+            </button>
+            <button
+              type="button"
+              class="filter-chip"
+              :class="{ 'filter-chip--active': statusFilter === 'Planning' }"
+              @click="setStatusFilter('Planning')"
+            >
+              Planning
+            </button>
+            <button
+              type="button"
+              class="filter-chip"
+              :class="{ 'filter-chip--active': statusFilter === 'Committed' }"
+              @click="setStatusFilter('Committed')"
+            >
+              Committed
+            </button>
+            <button
+              type="button"
+              class="filter-chip"
+              :class="{ 'filter-chip--active': statusFilter === 'Canceled' }"
+              @click="setStatusFilter('Canceled')"
+            >
+              Canceled
+            </button>
+            <button
+              type="button"
+              class="filter-chip"
+              :class="{ 'filter-chip--active': statusFilter === 'Completed' }"
+              @click="setStatusFilter('Completed')"
+            >
+              Completed
+            </button>
+          </div>
+
+          <!-- Export Dropdown -->
+          <div class="dropdown-container">
+            <button
+              type="button"
+              ref="exportButton"
+              class="btn btn--secondary btn--sm"
+              @click="toggleExportMenu"
+              @keydown.enter.prevent="toggleExportMenu"
+              @keydown.space.prevent="toggleExportMenu"
+              aria-haspopup="true"
+              :aria-expanded="showExportMenu.toString()"
+            >
+              Export ▾
+            </button>
+            <div
+              v-if="showExportMenu"
+              class="dropdown-menu"
+              role="menu"
+              @click.stop
+            >
+              <!-- List/Calendar view options -->
+              <template v-if="selectedTripId === null">
+                <button
+                  type="button"
+                  class="dropdown-menu__item"
+                  role="menuitem"
+                  @click="exportAllTripsToHTML(); closeExportMenu()"
+                >
+                  Export All Trips (HTML)
+                </button>
+                <button
+                  type="button"
+                  class="dropdown-menu__item"
+                  role="menuitem"
+                  @click="copyAllTrips(); closeExportMenu()"
+                >
+                  Copy All Trips (clipboard)
+                </button>
+              </template>
+
+              <!-- Trip detail view options -->
+              <template v-else>
+                <button
+                  type="button"
+                  class="dropdown-menu__item"
+                  role="menuitem"
+                  @click="exportTripToHTML(); closeExportMenu()"
+                >
+                  Export Trip (HTML)
+                </button>
+                <button
+                  type="button"
+                  class="dropdown-menu__item"
+                  role="menuitem"
+                  :disabled="!selectedTrip || (!selectedTrip.startDate && !selectedTrip.endDate)"
+                  @click="exportTripToICS(); closeExportMenu()"
+                >
+                  Export ICS
+                </button>
+                <button
+                  type="button"
+                  class="dropdown-menu__item"
+                  role="menuitem"
+                  @click="copyTripSummary(); closeExportMenu()"
+                >
+                  Copy Trip (clipboard)
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <div class="sort-control">
+            <select
+              class="select select--sm"
+              v-model="sortMode"
+              @change="onSortChange"
+            >
+              <option value="date-soonest">Date (Soonest)</option>
+              <option value="date-furthest">Date (Furthest)</option>
+              <option value="name-asc">Name (A–Z)</option>
+              <option value="name-desc">Name (Z–A)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="container">
+        <!-- List View -->
+        <div v-if="currentView === 'list' && selectedTripId === null">
+          <div v-if="visibleTrips.length === 0" class="empty-state">
+            <p class="empty-state__message">No trips found</p>
+            <p class="text-muted" v-if="dataFile.trips.length > 0">Try adjusting your search or filters</p>
+            <div v-else style="margin-top: 16px;">
+              <button type="button" class="btn btn--primary btn--sm" @click="loadExampleData">Load Example Data</button>
+              <p class="text-muted" style="margin-top: 8px; font-size: 14px;">Or click "Open" to load your own trips</p>
+            </div>
+          </div>
+          <div v-else class="trips-grid">
+            <!-- Upcoming trips (no label) -->
+            <div
+              v-for="trip in listGroups.upcoming"
+              :key="trip.id"
+              class="trip-card"
+              role="button"
+              tabindex="0"
+              @click="selectTrip(trip)"
+              @keydown.enter.prevent="selectTrip(trip)"
+              @keydown.space.prevent="selectTrip(trip)"
+            >
+              <div class="trip-card__header">
+                <h3 class="trip-card__title">{{ trip.name }}</h3>
+                <span :class="'badge badge--' + trip.status.toLowerCase()">
+                  {{ trip.status }}
+                </span>
+              </div>
+              <p v-if="trip.destination" class="trip-card__destination">
+                {{ trip.destination }}
+              </p>
+              <p v-if="trip.startDate" class="trip-card__dates">
+                {{ formatDateRange(trip.startDate, trip.endDate) }}
+                <span v-if="trip.daysUntil > 0"> • in {{ trip.daysUntil }} days</span>
+                <span v-if="trip.duration"> • {{ trip.duration }} day{{ trip.duration !== 1 ? 's' : '' }}</span>
+              </p>
+              <div class="trip-card__footer">
+                <span>Tasks: {{ trip.completedTodos }}/{{ trip.totalTodos }}</span>
+                <span>Budget: {{ formatCurrency(trip.totalBudget) }}</span>
+              </div>
+            </div>
+
+            <!-- Past trips divider -->
+            <div v-if="listGroups.past.length > 0" class="list-divider" role="separator">
+              <hr class="list-divider__line">
+              <span class="list-divider__label">Past trips</span>
+            </div>
+
+            <!-- Past trips -->
+            <div
+              v-for="trip in listGroups.past"
+              :key="trip.id"
+              class="trip-card"
+              role="button"
+              tabindex="0"
+              @click="selectTrip(trip)"
+              @keydown.enter.prevent="selectTrip(trip)"
+              @keydown.space.prevent="selectTrip(trip)"
+            >
+              <div class="trip-card__header">
+                <h3 class="trip-card__title">{{ trip.name }}</h3>
+                <span :class="'badge badge--' + trip.status.toLowerCase()">
+                  {{ trip.status }}
+                </span>
+              </div>
+              <p v-if="trip.destination" class="trip-card__destination">
+                {{ trip.destination }}
+              </p>
+              <p v-if="trip.startDate" class="trip-card__dates">
+                {{ formatDateRange(trip.startDate, trip.endDate) }}
+                <span v-if="trip.daysUntil > 0"> • in {{ trip.daysUntil }} days</span>
+                <span v-if="trip.duration"> • {{ trip.duration }} day{{ trip.duration !== 1 ? 's' : '' }}</span>
+              </p>
+              <div class="trip-card__footer">
+                <span>Tasks: {{ trip.completedTodos }}/{{ trip.totalTodos }}</span>
+                <span>Budget: {{ formatCurrency(trip.totalBudget) }}</span>
+              </div>
+            </div>
+
+            <!-- No date divider -->
+            <div v-if="listGroups.noDate.length > 0" class="list-divider" role="separator">
+              <hr class="list-divider__line">
+              <span class="list-divider__label">No date set</span>
+            </div>
+
+            <!-- No date trips -->
+            <div
+              v-for="trip in listGroups.noDate"
+              :key="trip.id"
+              class="trip-card"
+              role="button"
+              tabindex="0"
+              @click="selectTrip(trip)"
+              @keydown.enter.prevent="selectTrip(trip)"
+              @keydown.space.prevent="selectTrip(trip)"
+            >
+              <div class="trip-card__header">
+                <h3 class="trip-card__title">{{ trip.name }}</h3>
+                <span :class="'badge badge--' + trip.status.toLowerCase()">
+                  {{ trip.status }}
+                </span>
+              </div>
+              <p v-if="trip.destination" class="trip-card__destination">
+                {{ trip.destination }}
+              </p>
+              <p v-if="trip.startDate" class="trip-card__dates">
+                {{ formatDateRange(trip.startDate, trip.endDate) }}
+                <span v-if="trip.daysUntil > 0"> • in {{ trip.daysUntil }} days</span>
+                <span v-if="trip.duration"> • {{ trip.duration }} day{{ trip.duration !== 1 ? 's' : '' }}</span>
+              </p>
+              <div class="trip-card__footer">
+                <span>Tasks: {{ trip.completedTodos }}/{{ trip.totalTodos }}</span>
+                <span>Budget: {{ formatCurrency(trip.totalBudget) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div v-if="currentView === 'calendar' && selectedTripId === null">
+          <div v-if="visibleTrips.length === 0" class="empty-state">
+            <p class="empty-state__message">No trips found</p>
+            <p class="text-muted">Try adjusting your search or filters</p>
+          </div>
+
+          <div v-else class="calendar-view">
+            <!-- Year Sections -->
+            <div
+              v-for="(yearGroup, index) in calendarGroups.years"
+              :key="yearGroup.year"
+              class="calendar-year"
+            >
+              <!-- Year Divider (except before first year) -->
+              <hr v-if="index > 0" class="calendar-year__divider">
+
+              <!-- Year Header -->
+              <div class="calendar-year__header">
+                <h2 class="calendar-year__title">{{ yearGroup.year }}</h2>
+              </div>
+
+              <!-- Quarters Grid -->
+              <div class="calendar-quarters">
+                <div
+                  v-for="quarter in ['Q1', 'Q2', 'Q3', 'Q4']"
+                  :key="quarter"
+                  class="calendar-quarter"
+                  :class="{ 'calendar-quarter--empty': yearGroup.quarters[quarter].length === 0 }"
+                >
+                  <div class="calendar-quarter__header">
+                    <h3 class="calendar-quarter__title">{{ quarter }}</h3>
+                    <span v-if="yearGroup.quarters[quarter].length > 0" class="calendar-quarter__count">
+                      {{ yearGroup.quarters[quarter].length }} trip{{ yearGroup.quarters[quarter].length !== 1 ? 's' : '' }}
+                    </span>
+                  </div>
+
+                  <!-- Trip Mini-Cards -->
+                  <div v-if="yearGroup.quarters[quarter].length > 0" class="calendar-trips">
+                    <div
+                      v-for="trip in yearGroup.quarters[quarter]"
+                      :key="trip.id"
+                      class="calendar-trip"
+                      role="button"
+                      tabindex="0"
+                      @click="selectTrip(trip)"
+                      @keydown.enter.prevent="selectTrip(trip)"
+                      @keydown.space.prevent="selectTrip(trip)"
+                    >
+                      <div class="calendar-trip__name">{{ trip.name }}</div>
+                      <div v-if="trip.destination" class="calendar-trip__destination">{{ trip.destination }}</div>
+                      <div class="calendar-trip__meta">
+                        <span :class="'badge badge--' + trip.status.toLowerCase()">
+                          {{ trip.status }}
+                        </span>
+                        <span class="calendar-trip__dates">{{ formatDateRange(trip.startDate, trip.endDate) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p v-else class="calendar-quarter__empty">No trips</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- No Date Section (Quarter-Style Card) -->
+            <div v-if="calendarGroups.noDate.length > 0" class="calendar-nodate-section">
+              <hr class="calendar-year__divider">
+
+              <div class="calendar-quarter calendar-quarter--nodate">
+                <div class="calendar-quarter__header">
+                  <h3 class="calendar-quarter__title">No Date</h3>
+                  <span class="calendar-quarter__count">
+                    {{ calendarGroups.noDate.length }} trip{{ calendarGroups.noDate.length !== 1 ? 's' : '' }}
+                  </span>
+                </div>
+
+                <div class="calendar-trips">
+                  <div
+                    v-for="trip in calendarGroups.noDate"
+                    :key="trip.id"
+                    class="calendar-trip"
+                    role="button"
+                    tabindex="0"
+                    @click="selectTrip(trip)"
+                    @keydown.enter.prevent="selectTrip(trip)"
+                    @keydown.space.prevent="selectTrip(trip)"
+                  >
+                    <div class="calendar-trip__name">{{ trip.name }}</div>
+                    <div v-if="trip.destination" class="calendar-trip__destination">{{ trip.destination }}</div>
+                    <div class="calendar-trip__meta">
+                      <span :class="'badge badge--' + trip.status.toLowerCase()">
+                        {{ trip.status }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trip Detail View -->
+        <div v-if="selectedTripId !== null">
+          <div class="detail-header">
+            <button type="button" class="detail-header__back" @click="navigateToList">
+              ← Back to List
+            </button>
+            <div class="detail-header__actions">
+              <button type="button" class="btn btn--secondary btn--sm" @click="duplicateTrip">Duplicate</button>
+              <button type="button" class="btn btn--danger btn--sm" @click="openDeleteTrip">Delete</button>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section__header">
+              <h3 class="detail-section__title">Trip Information</h3>
+            </div>
+            <div class="detail-section__content">
+              <div class="trip-form">
+                <div class="trip-form__row">
+                  <div class="trip-form__field">
+                    <label for="trip-name" class="form-label">Name *</label>
+                    <input
+                      id="trip-name"
+                      type="text"
+                      class="input"
+                      v-model="selectedTrip.name"
+                      @input="markUnsaved"
+                      placeholder="Trip name"
+                    >
+                  </div>
+                  <div class="trip-form__field">
+                    <label for="trip-status" class="form-label">Status</label>
+                    <select
+                      id="trip-status"
+                      class="select"
+                      v-model="selectedTrip.status"
+                      @change="markUnsaved"
+                    >
+                      <option value="Planning">Planning</option>
+                      <option value="Committed">Committed</option>
+                      <option value="Canceled">Canceled</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="trip-form__field">
+                  <label for="trip-destination" class="form-label">Destination</label>
+                  <input
+                    id="trip-destination"
+                    type="text"
+                    class="input"
+                    v-model="selectedTrip.destination"
+                    @input="markUnsaved"
+                    placeholder="e.g., Yosemite National Park, CA"
+                  >
+                </div>
+
+                <div class="trip-form__row">
+                  <div class="trip-form__field">
+                    <label for="trip-start-date" class="form-label">Start Date</label>
+                    <input
+                      id="trip-start-date"
+                      type="date"
+                      class="input"
+                      :class="{ 'input--empty': !selectedTrip.startDate }"
+                      v-model="selectedTrip.startDate"
+                      @input="onTripStartDateChange"
+                    >
+                    <span v-if="!selectedTrip.startDate" class="field-hint">No date set</span>
+                  </div>
+                  <div class="trip-form__field">
+                    <label for="trip-end-date" class="form-label">End Date</label>
+                    <input
+                      id="trip-end-date"
+                      type="date"
+                      class="input"
+                      :class="{ 'input--empty': !selectedTrip.endDate }"
+                      v-model="selectedTrip.endDate"
+                      @input="markUnsaved"
+                    >
+                    <span v-if="!selectedTrip.endDate" class="field-hint">No date set</span>
+                  </div>
+                </div>
+
+                <div class="trip-form__field">
+                  <label for="trip-description" class="form-label">Description</label>
+                  <textarea
+                    id="trip-description"
+                    class="textarea"
+                    v-model="selectedTrip.description"
+                    @input="markUnsaved"
+                    placeholder="Trip overview or highlights..."
+                    rows="3"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section__header">
+              <h3
+                class="detail-section__title"
+                role="button"
+                tabindex="0"
+                :aria-expanded="tasksExpanded.toString()"
+                @click="tasksExpanded = !tasksExpanded"
+                @keydown.enter.prevent="tasksExpanded = !tasksExpanded"
+                @keydown.space.prevent="tasksExpanded = !tasksExpanded"
+                style="cursor: pointer;"
+              >
+                Tasks
+                <svg v-if="tasksExpanded" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-left: 8px; vertical-align: middle;">
+                  <path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-left: 8px; vertical-align: middle;">
+                  <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </h3>
+              <button v-show="tasksExpanded" type="button" class="btn btn--secondary btn--sm" @click="openAddTodo">Add Task</button>
+            </div>
+            <div v-show="tasksExpanded" class="detail-section__content">
+              <div v-if="!selectedTrip.todos || selectedTrip.todos.length === 0" class="empty-state-small">
+                <p class="text-muted">No tasks yet. Add your first task.</p>
+              </div>
+              <div v-else class="todo-list">
+                <div
+                  v-for="todo in selectedTrip.todos"
+                  :key="todo.id"
+                  class="todo-item"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="todo.completed"
+                    @change="toggleTodoCompleted(todo)"
+                    :aria-label="'Mark task ' + todo.title + ' as ' + (todo.completed ? 'incomplete' : 'complete')"
+                    class="todo-checkbox"
+                  >
+                  <div class="todo-content" :class="{ 'todo-content--completed': todo.completed }">
+                    <div class="todo-title">{{ todo.title }}</div>
+                    <div v-if="todo.description" class="todo-description">{{ todo.description }}</div>
+                  </div>
+                  <div class="todo-actions">
+                    <button type="button" class="btn-icon" @click="openEditTodo(todo)" aria-label="Edit task">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.5 2L14 4.5L5 13.5H2.5V11L11.5 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                    <button type="button" class="btn-icon btn-icon--danger" @click="openDeleteTodo(todo)" aria-label="Delete task">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 4H14M5 4V2.5C5 2.22386 5.22386 2 5.5 2H10.5C10.7761 2 11 2.22386 11 2.5V4M6.5 7.5V11.5M9.5 7.5V11.5M3.5 4L4 13.5C4 13.7761 4.22386 14 4.5 14H11.5C11.7761 14 12 13.7761 12 13.5L12.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section__header">
+              <h3
+                class="detail-section__title"
+                role="button"
+                tabindex="0"
+                :aria-expanded="expensesExpanded.toString()"
+                @click="expensesExpanded = !expensesExpanded"
+                @keydown.enter.prevent="expensesExpanded = !expensesExpanded"
+                @keydown.space.prevent="expensesExpanded = !expensesExpanded"
+                style="cursor: pointer;"
+              >
+                Expenses
+                <svg v-if="expensesExpanded" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-left: 8px; vertical-align: middle;">
+                  <path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-left: 8px; vertical-align: middle;">
+                  <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </h3>
+              <button v-show="expensesExpanded" type="button" class="btn btn--secondary btn--sm" @click="openAddExpense">Add Expense</button>
+            </div>
+            <div v-show="expensesExpanded" class="detail-section__content">
+              <div v-if="!selectedTrip.expenses || selectedTrip.expenses.length === 0" class="empty-state-small">
+                <p class="text-muted">No expenses yet. Add your first expense.</p>
+              </div>
+              <div v-else>
+                <div class="expense-list">
+                  <div v-for="expense in selectedTrip.expenses" :key="expense.id" class="expense-item">
+                    <div class="expense-content">
+                      <div class="expense-header">
+                        <div class="expense-title">{{ expense.title }}</div>
+                        <div class="expense-amount">{{ formatCurrency(expense.amount) }}</div>
+                      </div>
+                      <div class="expense-meta">
+                        <span class="badge badge--secondary">{{ expense.category }}</span>
+                        <span v-if="expense.description" class="expense-description">{{ expense.description }}</span>
+                      </div>
+                    </div>
+                    <div class="expense-actions">
+                      <button type="button" class="btn-icon" @click="openEditExpense(expense)" aria-label="Edit expense">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.3337 2.00004C11.5089 1.82494 11.7172 1.68605 11.9463 1.59129C12.1755 1.49653 12.4212 1.44775 12.6695 1.44775C12.9178 1.44775 13.1635 1.49653 13.3927 1.59129C13.6218 1.68605 13.8301 1.82494 14.0053 2.00004C14.1804 2.17513 14.3193 2.38349 14.4141 2.61261C14.5088 2.84173 14.5576 3.08743 14.5576 3.33571C14.5576 3.58399 14.5088 3.82969 14.4141 4.05881C14.3193 4.28793 14.1804 4.49629 14.0053 4.67137L5.00033 13.6764L1.33366 14.6667L2.32399 11L11.3337 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                      <button type="button" class="btn-icon btn-icon--danger" @click="openDeleteExpense(expense)" aria-label="Delete expense">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M2 4H3.33333H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M5.33333 4.00004V2.66671C5.33333 2.31309 5.47381 1.97395 5.72386 1.7239C5.97391 1.47385 6.31304 1.33337 6.66667 1.33337H9.33333C9.68696 1.33337 10.0261 1.47385 10.2761 1.7239C10.5262 1.97395 10.6667 2.31309 10.6667 2.66671V4.00004M12.6667 4.00004V13.3334C12.6667 13.687 12.5262 14.0261 12.2761 14.2762C12.0261 14.5262 11.687 14.6667 11.3333 14.6667H4.66667C4.31304 14.6667 3.97391 14.5262 3.72386 14.2762C3.47381 14.0261 3.33333 13.687 3.33333 13.3334V4.00004H12.6667Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="expense-total">
+                  <strong>Total Budget:</strong> {{ formatCurrency(computeTripMeta(selectedTrip).totalBudget) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section__header">
+              <h3 class="detail-section__title">Notes</h3>
+            </div>
+            <div class="detail-section__content">
+              <textarea
+                class="textarea"
+                v-model="selectedTrip.notes"
+                @input="markUnsaved"
+                placeholder="Add notes about this trip..."
+                rows="5"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container">
+      <div
+        v-for="toast in toasts"
+        :key="toast.id"
+        :class="['toast', 'toast--' + toast.type, { 'toast--clickable': toast.onClick }]"
+        @click="handleToastClick(toast)"
+      >
+        {{ toast.message }}
+      </div>
+    </div>
+
+    <!-- Fixes Details Modal -->
+    <div
+      v-if="showFixesModal"
+      class="modal-overlay"
+      @click.self="closeFixesModal"
+    >
+      <div
+        class="modal modal--wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="fixes-modal-title"
+      >
+        <div class="modal__header">
+          <h3 id="fixes-modal-title" class="modal__title">Import Fixes Applied</h3>
+          <button
+            type="button"
+            class="modal__close"
+            @click="closeFixesModal"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal__body">
+          <p class="text-muted mb-4">
+            The following issues were automatically fixed during import:
+          </p>
+          <div class="fixes-list">
+            <div v-for="(fix, index) in importFixes" :key="index" class="fixes-list__item">
+              {{ fix }}
+            </div>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--primary btn--sm" @click="closeFixesModal">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Unsaved Changes Modal -->
+    <div
+      v-if="showConfirmModal"
+      class="modal-overlay"
+      @click.self="cancelDiscard"
+    >
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-modal-title"
+      >
+        <div class="modal__header">
+          <h3 id="confirm-modal-title" class="modal__title">Unsaved Changes</h3>
+        </div>
+        <div class="modal__body">
+          <p>You have unsaved changes. Discard them and continue?</p>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary btn--sm" @click="cancelDiscard">Stay</button>
+          <button type="button" class="btn btn--danger btn--sm" @click="confirmDiscard">Discard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Todo Modal -->
+    <div
+      v-if="showTodoModal"
+      class="modal-overlay"
+      @click.self="closeTodoModal"
+    >
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="todoModalMode === 'add' ? 'add-todo-title' : 'edit-todo-title'"
+      >
+        <div class="modal__header">
+          <h3 :id="todoModalMode === 'add' ? 'add-todo-title' : 'edit-todo-title'" class="modal__title">
+            {{ todoModalMode === 'add' ? 'Add Task' : 'Edit Task' }}
+          </h3>
+          <button
+            type="button"
+            class="modal__close"
+            @click="closeTodoModal"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal__body">
+          <div class="form-field">
+            <label for="todo-title" class="form-label">Title <span class="text-error">*</span></label>
+            <input
+              type="text"
+              id="todo-title"
+              class="input"
+              v-model="todoForm.title"
+              placeholder="Enter task title"
+              @keydown.enter="submitTodoForm"
+            >
+            <div v-if="todoFormError" class="form-error">{{ todoFormError }}</div>
+          </div>
+          <div class="form-field">
+            <label for="todo-description" class="form-label">Description</label>
+            <textarea
+              id="todo-description"
+              class="textarea"
+              v-model="todoForm.description"
+              placeholder="Optional details..."
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary btn--sm" @click="closeTodoModal">Cancel</button>
+          <button type="button" class="btn btn--primary btn--sm" @click="submitTodoForm">
+            {{ todoModalMode === 'add' ? 'Add Task' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Todo Confirm Modal -->
+    <div
+      v-if="showDeleteTodoModal"
+      class="modal-overlay"
+      @click.self="closeDeleteTodoModal"
+    >
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-todo-title"
+      >
+        <div class="modal__header">
+          <h3 id="delete-todo-title" class="modal__title">Delete task?</h3>
+        </div>
+        <div class="modal__body">
+          <p>This will permanently remove <strong>{{ deletingTodo ? deletingTodo.title : '' }}</strong>.</p>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary btn--sm" @click="closeDeleteTodoModal">Cancel</button>
+          <button type="button" class="btn btn--danger btn--sm" @click="confirmDeleteTodo">Delete</button>
+        </div>
+      </div>
+    </div>
+
+  <!-- Add/Edit Expense Modal -->
+  <div
+    v-if="showExpenseModal"
+    class="modal-overlay"
+    @click.self="closeExpenseModal"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="expense-modal-title"
+    >
+      <div class="modal__header">
+        <h3 id="expense-modal-title" class="modal__title">{{ expenseModalMode === 'add' ? 'Add Expense' : 'Edit Expense' }}</h3>
+        <button
+          type="button"
+          class="btn btn--secondary btn--icon-only btn--sm"
+          @click="closeExpenseModal"
+          aria-label="Close"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <form @submit.prevent="submitExpenseForm">
+        <div class="modal__body">
+          <div class="form-field">
+            <label for="expense-title" class="form-label">Title *</label>
+            <input
+              id="expense-title"
+              type="text"
+              class="input"
+              v-model="expenseForm.title"
+              placeholder="e.g., Hotel booking"
+            />
+            <div v-if="expenseFormErrors.title" class="form-error">{{ expenseFormErrors.title }}</div>
+          </div>
+
+          <div class="form-field">
+            <label for="expense-amount" class="form-label">Amount *</label>
+            <input
+              id="expense-amount"
+              type="number"
+              step="0.01"
+              class="input"
+              v-model="expenseForm.amount"
+              placeholder="0.00"
+            />
+            <div v-if="expenseFormErrors.amount" class="form-error">{{ expenseFormErrors.amount }}</div>
+          </div>
+
+          <div class="form-field">
+            <label for="expense-category" class="form-label">Category *</label>
+            <select
+              id="expense-category"
+              class="select"
+              v-model="expenseForm.category"
+            >
+              <option value="Lodging">Lodging</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Food">Food</option>
+              <option value="Activities">Activities</option>
+              <option value="Permits">Permits</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="expense-description" class="form-label">Description</label>
+            <textarea
+              id="expense-description"
+              class="textarea"
+              v-model="expenseForm.description"
+              placeholder="Optional notes..."
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary btn--sm" @click="closeExpenseModal">Cancel</button>
+          <button type="submit" class="btn btn--primary btn--sm">{{ expenseModalMode === 'add' ? 'Add Expense' : 'Save Changes' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Expense Confirm Modal -->
+  <div
+    v-if="showDeleteExpenseModal"
+    class="modal-overlay"
+    @click.self="closeDeleteExpenseModal"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-expense-title"
+    >
+      <div class="modal__header">
+        <h3 id="delete-expense-title" class="modal__title">Delete expense?</h3>
+      </div>
+      <div class="modal__body">
+        <p>This will permanently remove <strong>{{ deletingExpense ? deletingExpense.title : '' }}</strong>.</p>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--secondary btn--sm" @click="closeDeleteExpenseModal">Cancel</button>
+        <button type="button" class="btn btn--danger btn--sm" @click="confirmDeleteExpense">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Trip Modal -->
+  <div
+    v-if="showNewTripModal"
+    class="modal-overlay"
+    @click.self="closeNewTripModal"
+  >
+    <div
+      class="modal modal--wide"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="new-trip-title"
+    >
+      <div class="modal__header">
+        <h3 id="new-trip-title" class="modal__title">New Trip</h3>
+        <button
+          type="button"
+          class="btn btn--secondary btn--icon-only btn--sm"
+          @click="closeNewTripModal"
+          aria-label="Close"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <form @submit.prevent="submitNewTripForm">
+        <div class="modal__body">
+          <div class="form-field">
+            <label for="new-trip-name" class="form-label">Trip Name *</label>
+            <input
+              id="new-trip-name"
+              type="text"
+              class="input"
+              v-model="newTripForm.name"
+              placeholder="e.g., Yosemite Summer Trip"
+            />
+            <div v-if="newTripFormErrors.name" class="form-error">{{ newTripFormErrors.name }}</div>
+          </div>
+
+          <div class="form-field">
+            <label for="new-trip-destination" class="form-label">Destination</label>
+            <input
+              id="new-trip-destination"
+              type="text"
+              class="input"
+              v-model="newTripForm.destination"
+              placeholder="e.g., Yosemite National Park, CA"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="new-trip-start-date" class="form-label">Start Date</label>
+              <input
+                id="new-trip-start-date"
+                type="date"
+                class="input"
+                :class="{ 'input--empty': !newTripForm.startDate }"
+                v-model="newTripForm.startDate"
+                @input="onNewTripStartDateChange"
+              />
+              <span v-if="!newTripForm.startDate" class="field-hint">Optional - leave empty if TBD</span>
+            </div>
+
+            <div class="form-field">
+              <label for="new-trip-end-date" class="form-label">End Date</label>
+              <input
+                id="new-trip-end-date"
+                type="date"
+                class="input"
+                :class="{ 'input--empty': !newTripForm.endDate }"
+                v-model="newTripForm.endDate"
+              />
+              <span v-if="!newTripForm.endDate" class="field-hint">Optional - leave empty if TBD</span>
+            </div>
+          </div>
+          <div v-if="newTripFormErrors.dates" class="form-error">{{ newTripFormErrors.dates }}</div>
+
+          <div class="form-field">
+            <label for="new-trip-status" class="form-label">Status</label>
+            <select
+              id="new-trip-status"
+              class="select"
+              v-model="newTripForm.status"
+            >
+              <option value="Planning">Planning</option>
+              <option value="Committed">Committed</option>
+              <option value="Canceled">Canceled</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="new-trip-description" class="form-label">Description</label>
+            <textarea
+              id="new-trip-description"
+              class="textarea"
+              v-model="newTripForm.description"
+              placeholder="Trip overview or highlights..."
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="form-field">
+            <label for="new-trip-notes" class="form-label">Notes</label>
+            <textarea
+              id="new-trip-notes"
+              class="textarea"
+              v-model="newTripForm.notes"
+              placeholder="Detailed notes, links, reminders..."
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary btn--sm" @click="closeNewTripModal">Cancel</button>
+          <button type="submit" class="btn btn--primary btn--sm">Create Trip</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Trip Confirm Modal -->
+  <div
+    v-if="showDeleteTripModal"
+    class="modal-overlay"
+    @click.self="closeDeleteTripModal"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-trip-title"
+    >
+      <div class="modal__header">
+        <h3 id="delete-trip-title" class="modal__title">Delete trip?</h3>
+      </div>
+      <div class="modal__body">
+        <p>This will permanently delete <strong>{{ deletingTrip ? deletingTrip.name : '' }}</strong> and all its tasks and expenses.</p>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--secondary btn--sm" @click="closeDeleteTripModal">Cancel</button>
+        <button type="button" class="btn btn--danger btn--sm" @click="confirmDeleteTrip">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open or Merge Modal -->
+  <div
+    v-if="showOpenMergeModal"
+    class="modal-overlay"
+    @click.self="cancelOpenMerge"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="open-merge-title"
+    >
+      <div class="modal__header">
+        <h3 id="open-merge-title" class="modal__title">Open or Merge?</h3>
+      </div>
+      <div class="modal__body">
+        <p>You already have <strong>{{ dataFile.trips.length }} trip{{ dataFile.trips.length !== 1 ? 's' : '' }}</strong> loaded in <strong>"{{ currentCollectionName }}"</strong>.</p>
+        <p style="margin-top: 12px;">Do you want to <strong>replace</strong> them with the new file, or <strong>merge</strong> the new trips into this collection?</p>
+        <p v-if="pendingImportData && pendingImportData.trips.length > 0" style="margin-top: 12px; font-size: 14px; color: var(--text-muted);">
+          The file contains {{ pendingImportData.trips.length }} trip{{ pendingImportData.trips.length !== 1 ? 's' : '' }}.
+        </p>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--secondary btn--sm" @click="cancelOpenMerge">Cancel</button>
+        <button type="button" class="btn btn--secondary btn--sm" @click="confirmOpenMerge">Merge</button>
+        <button type="button" class="btn btn--primary btn--sm" @click="confirmOpenReplace">Open (Replace)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Location Info Modal -->
+  <div
+    v-if="showFileLocationInfoModal"
+    class="modal-overlay"
+    @click.self="closeFileLocationInfo"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="file-location-title"
+    >
+      <div class="modal__header">
+        <h3 id="file-location-title" class="modal__title">📁 About File Saving</h3>
+      </div>
+      <div class="modal__body">
+        <p><strong>Browser security prevents updating files in their original location.</strong></p>
+        <p style="margin-top: 12px;">When you save changes:</p>
+        <ul style="margin: 12px 0; padding-left: 24px;">
+          <li style="margin: 6px 0;">The updated file will download to your <strong>Downloads folder</strong></li>
+          <li style="margin: 6px 0;">The original file in its original location <strong>will not be updated</strong></li>
+          <li style="margin: 6px 0;">You'll need to <strong>move the file from Downloads</strong> to replace your original</li>
+        </ul>
+        <p style="margin-top: 12px; font-size: 14px; color: var(--text-muted);">
+          Tip: Consider keeping all your Travel Hub files in one folder (like Downloads) to simplify your workflow.
+        </p>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--primary btn--sm" @click="closeFileLocationInfo">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Save Button (Mobile) -->
+  <button
+    v-if="unsavedChanges"
+    type="button"
+    class="floating-save-btn"
+    @click="saveJSON"
+    title="Save changes"
+  >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M17 21V13H7V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 3V8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Save</span>
+  </button>
+  </div>
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <!-- App Script -->
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          theme: 'light',
+          currentView: 'list',
+          selectedTripId: null,
+          searchQuery: '',
+          statusFilter: 'All', // 'All', 'Planning', 'Committed', 'Canceled', 'Completed'
+          sortMode: 'date-soonest', // 'date-soonest', 'date-furthest', 'name-asc', 'name-desc'
+          tasksExpanded: false, // Tasks section collapsed by default
+          expensesExpanded: false, // Expenses section collapsed by default
+          showExportMenu: false,
+          showFixesModal: false,
+          showConfirmModal: false,
+          showTodoModal: false,
+          showDeleteTodoModal: false,
+          todoModalMode: 'add', // 'add' or 'edit'
+          editingTodo: null,
+          deletingTodo: null,
+          todoForm: {
+            title: '',
+            description: ''
+          },
+          todoFormError: '',
+          showExpenseModal: false,
+          showDeleteExpenseModal: false,
+          expenseModalMode: 'add', // 'add' or 'edit'
+          editingExpense: null,
+          deletingExpense: null,
+          expenseForm: {
+            title: '',
+            description: '',
+            amount: '',
+            category: 'Lodging'
+          },
+          expenseFormErrors: {
+            title: '',
+            amount: ''
+          },
+          showNewTripModal: false,
+          showDeleteTripModal: false,
+          deletingTrip: null,
+          newTripForm: {
+            name: '',
+            destination: '',
+            startDate: '',
+            endDate: '',
+            status: 'Planning',
+            description: '',
+            notes: ''
+          },
+          newTripFormErrors: {
+            name: '',
+            dates: ''
+          },
+          modalTriggerElement: null,
+          unsavedChanges: false,
+          toasts: [],
+          importFixes: [],
+          pendingNavigation: null,
+          currentCollectionName: 'Untitled',
+          lastSavedFileName: null,
+          showOpenMergeModal: false,
+          showFileLocationInfoModal: false,
+          pendingImportData: null,
+          pendingImportFileName: null,
+          pendingImportFixes: [],
+          dataFile: {
+            version: '1.0.0',
+            trips: [],
+            exportDate: null
+          }
+        };
+      },
+      watch: {
+        unsavedChanges(newVal) {
+          if (newVal) {
+            window.addEventListener('beforeunload', this.handleBeforeUnload);
+          } else {
+            window.removeEventListener('beforeunload', this.handleBeforeUnload);
+          }
+        }
+      },
+      computed: {
+        trips() {
+          return this.dataFile.trips || [];
+        },
+        selectedTrip() {
+          if (this.selectedTripId === null) return null;
+          return this.trips.find(t => t.id === this.selectedTripId) || null;
+        },
+        filteredTrips() {
+          let trips = this.tripsWithMetadata;
+
+          // Apply search filter
+          if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            trips = trips.filter(trip =>
+              trip.name.toLowerCase().includes(query) ||
+              (trip.destination && trip.destination.toLowerCase().includes(query))
+            );
+          }
+
+          // Apply status filter
+          if (this.statusFilter !== 'All') {
+            trips = trips.filter(trip => trip.status === this.statusFilter);
+          }
+
+          return trips;
+        },
+        sortedTrips() {
+          // Always sort a shallow copy, never mutate original
+          const trips = [...this.filteredTrips];
+
+          if (this.sortMode === 'date-soonest' || this.sortMode === 'date-furthest') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Split trips into categories
+            const upcoming = [];
+            const past = [];
+            const noDate = [];
+
+            trips.forEach(trip => {
+              // Determine effective date (startDate else endDate)
+              const effectiveDateStr = trip.startDate || trip.endDate;
+
+              if (!effectiveDateStr) {
+                noDate.push(trip);
+                return;
+              }
+
+              const effectiveDate = this.parseLocalDate(effectiveDateStr);
+              effectiveDate.setHours(0, 0, 0, 0);
+
+              if (effectiveDate >= today) {
+                upcoming.push({ trip, date: effectiveDate.getTime() });
+              } else {
+                past.push({ trip, date: effectiveDate.getTime() });
+              }
+            });
+
+            // Sort based on mode
+            if (this.sortMode === 'date-soonest') {
+              // Upcoming: ascending (closest to today first)
+              upcoming.sort((a, b) => a.date - b.date || a.trip.name.localeCompare(b.trip.name));
+              // Past: descending (most recent past first)
+              past.sort((a, b) => b.date - a.date || a.trip.name.localeCompare(b.trip.name));
+            } else {
+              // date-furthest
+              // Upcoming: descending (furthest future first)
+              upcoming.sort((a, b) => b.date - a.date || a.trip.name.localeCompare(b.trip.name));
+              // Past: ascending (oldest past first)
+              past.sort((a, b) => a.date - b.date || a.trip.name.localeCompare(b.trip.name));
+            }
+
+            // Sort noDate by name
+            noDate.sort((a, b) => a.name.localeCompare(b.name));
+
+            // Combine: upcoming + past + noDate
+            return [
+              ...upcoming.map(item => item.trip),
+              ...past.map(item => item.trip),
+              ...noDate
+            ];
+          } else if (this.sortMode === 'name-asc' || this.sortMode === 'name-desc') {
+            trips.sort((a, b) => {
+              const nameA = a.name.toLowerCase();
+              const nameB = b.name.toLowerCase();
+              if (this.sortMode === 'name-asc') {
+                return nameA.localeCompare(nameB);
+              } else {
+                return nameB.localeCompare(nameA);
+              }
+            });
+          }
+
+          return trips;
+        },
+        visibleTrips() {
+          // Final dataset used by list rendering
+          return this.sortedTrips;
+        },
+        listGroups() {
+          // Group trips for list view with dividers
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const groups = {
+            upcoming: [],
+            past: [],
+            noDate: []
+          };
+
+          this.visibleTrips.forEach(trip => {
+            // Determine effective date (startDate else endDate)
+            const effectiveDateStr = trip.startDate || trip.endDate;
+
+            if (!effectiveDateStr) {
+              groups.noDate.push(trip);
+              return;
+            }
+
+            const effectiveDate = this.parseLocalDate(effectiveDateStr);
+            effectiveDate.setHours(0, 0, 0, 0);
+
+            if (effectiveDate >= today) {
+              groups.upcoming.push(trip);
+            } else {
+              groups.past.push(trip);
+            }
+          });
+
+          return groups;
+        },
+        calendarGroups() {
+          // Group trips by year and quarter for calendar view
+          const groups = {
+            years: [],
+            noDate: []
+          };
+
+          const yearMap = {}; // { 2026: { Q1: [...], Q2: [...], Q3: [...], Q4: [...] } }
+
+          this.visibleTrips.forEach(trip => {
+            // Determine date to use (startDate or endDate)
+            const dateStr = trip.startDate || trip.endDate;
+
+            if (!dateStr) {
+              // No date - add to noDate bucket
+              groups.noDate.push(trip);
+              return;
+            }
+
+            // Parse date and extract year and quarter
+            const date = this.parseLocalDate(dateStr);
+            const year = date.getFullYear();
+            const month = date.getMonth(); // 0-11
+
+            // Determine quarter (Q1: 0-2, Q2: 3-5, Q3: 6-8, Q4: 9-11)
+            const quarter = Math.floor(month / 3) + 1;
+            const quarterKey = `Q${quarter}`;
+
+            // Initialize year if needed
+            if (!yearMap[year]) {
+              yearMap[year] = {
+                Q1: [],
+                Q2: [],
+                Q3: [],
+                Q4: []
+              };
+            }
+
+            // Add trip to appropriate quarter
+            yearMap[year][quarterKey].push(trip);
+          });
+
+          // Convert yearMap to sorted array based on sort mode
+          const years = Object.keys(yearMap).map(y => parseInt(y)).sort((a, b) => {
+            // If sorting by date-furthest (furthest first), show newest year first
+            if (this.sortMode === 'date-furthest') {
+              return b - a; // descending
+            } else {
+              return a - b; // ascending (date-soonest or name sorts)
+            }
+          });
+
+          // Build final years array
+          groups.years = years.map(year => ({
+            year,
+            quarters: yearMap[year]
+          }));
+
+          return groups;
+        },
+        tripsWithMetadata() {
+          return this.trips.map(trip => {
+            const meta = this.computeTripMeta(trip);
+            return { ...trip, ...meta };
+          });
+        },
+        stats() {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          // Total Budget: only upcoming/today trips that aren't completed/canceled
+          const totalBudget = this.visibleTrips.reduce((sum, trip) => {
+            // Skip completed and canceled trips
+            if (trip.status === 'Completed' || trip.status === 'Canceled') {
+              return sum;
+            }
+
+            // Determine effective date (startDate else endDate)
+            const effectiveDateStr = trip.startDate || trip.endDate;
+            if (!effectiveDateStr) {
+              // No date - exclude from budget
+              return sum;
+            }
+
+            // Check if effective date is today or later
+            const effectiveDate = this.parseLocalDate(effectiveDateStr);
+            effectiveDate.setHours(0, 0, 0, 0);
+
+            if (effectiveDate < today) {
+              // Past trip - exclude from budget
+              return sum;
+            }
+
+            // Include this trip's expenses
+            const expenses = trip.expenses || [];
+            const tripTotal = expenses.reduce((tripSum, exp) => {
+              return tripSum + this.safeParseNumber(exp.amount);
+            }, 0);
+            return sum + tripTotal;
+          }, 0);
+
+          return {
+            total: this.visibleTrips.length,
+            upcoming: this.visibleTrips.filter(trip => {
+              if (!trip.startDate) return false;
+              const start = this.parseLocalDate(trip.startDate);
+              return start >= today && trip.status !== 'Canceled' && trip.status !== 'Completed';
+            }).length,
+            completed: this.visibleTrips.filter(trip => trip.status === 'Completed').length,
+            budget: totalBudget
+          };
+        }
+      },
+      methods: {
+        // Compute derived trip metadata from real data
+        computeTripMeta(trip) {
+          const meta = {};
+
+          // Todos count
+          const todos = trip.todos || [];
+          meta.totalTodos = todos.length;
+          meta.completedTodos = todos.filter(t => t.completed).length;
+
+          // Budget from expenses
+          const expenses = trip.expenses || [];
+          meta.totalBudget = expenses.reduce((sum, exp) => {
+            return sum + this.safeParseNumber(exp.amount);
+          }, 0);
+
+          // Days until trip (Safari-safe)
+          if (trip.startDate) {
+            const start = this.parseLocalDate(trip.startDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const diffTime = start - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            meta.daysUntil = diffDays > 0 ? diffDays : 0;
+          }
+
+          // Trip duration (Safari-safe)
+          if (trip.startDate && trip.endDate) {
+            const start = this.parseLocalDate(trip.startDate);
+            const end = this.parseLocalDate(trip.endDate);
+            const diffTime = end - start;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            meta.duration = diffDays;
+          }
+
+          return meta;
+        },
+        // Safari-safe date parsing (prevents off-by-one errors)
+        parseLocalDate(dateString) {
+          if (!dateString) return null;
+          // Add time component to ensure local timezone interpretation
+          return new Date(dateString + 'T00:00:00');
+        },
+        // Helper: validate ISO date format (YYYY-MM-DD)
+        isIsoDate(str) {
+          if (typeof str !== 'string') return false;
+          const match = /^\d{4}-\d{2}-\d{2}$/.test(str);
+          if (!match) return false;
+          const date = new Date(str + 'T00:00:00');
+          return !isNaN(date.getTime());
+        },
+        // Helper: safe number parsing
+        safeParseNumber(value) {
+          const num = parseFloat(value);
+          return (isFinite(num) && !isNaN(num)) ? num : 0;
+        },
+        // Helper: generate unique ID
+        makeId() {
+          return Date.now() + Math.floor(Math.random() * 100000);
+        },
+        // Normalize entire imported file
+        normalizeFile(rawData) {
+          const fixes = [];
+
+          // Normalize version
+          let version = rawData.version;
+          if (!version || typeof version !== 'string') {
+            version = '1.0.0';
+            fixes.push('Missing version → set to 1.0.0');
+          }
+
+          // Normalize exportDate
+          let exportDate = rawData.exportDate;
+          if (!exportDate || typeof exportDate !== 'string') {
+            exportDate = new Date().toISOString();
+            fixes.push('Missing exportDate → set to current timestamp');
+          }
+
+          // Normalize trips array
+          const trips = Array.isArray(rawData.trips) ? rawData.trips : [];
+          const normalizedTrips = trips.map((trip, index) =>
+            this.normalizeTrip(trip, index, fixes)
+          );
+
+          return {
+            dataFile: { version, trips: normalizedTrips, exportDate },
+            fixes
+          };
+        },
+        // Normalize a single trip
+        normalizeTrip(rawTrip, index, fixes) {
+          const tripLabel = `Trip ${index + 1}`;
+          const normalized = {};
+
+          // ID
+          if (!rawTrip.id || typeof rawTrip.id !== 'number') {
+            normalized.id = this.makeId();
+            fixes.push(`${tripLabel}: missing id → generated new id`);
+          } else {
+            normalized.id = rawTrip.id;
+          }
+
+          // Name
+          if (!rawTrip.name || typeof rawTrip.name !== 'string' || !rawTrip.name.trim()) {
+            normalized.name = 'Untitled Trip';
+            fixes.push(`${tripLabel}: missing name → set to "Untitled Trip"`);
+          } else {
+            normalized.name = rawTrip.name;
+          }
+
+          // Destination
+          normalized.destination = (typeof rawTrip.destination === 'string') ? rawTrip.destination : '';
+
+          // Description
+          normalized.description = (typeof rawTrip.description === 'string') ? rawTrip.description : '';
+
+          // StartDate
+          if (rawTrip.startDate && this.isIsoDate(rawTrip.startDate)) {
+            normalized.startDate = rawTrip.startDate;
+          } else {
+            normalized.startDate = '';
+            if (rawTrip.startDate) {
+              fixes.push(`${tripLabel}: invalid startDate → cleared`);
+            }
+          }
+
+          // EndDate
+          if (rawTrip.endDate && this.isIsoDate(rawTrip.endDate)) {
+            normalized.endDate = rawTrip.endDate;
+          } else {
+            normalized.endDate = '';
+            if (rawTrip.endDate) {
+              fixes.push(`${tripLabel}: invalid endDate → cleared`);
+            }
+          }
+
+          // Status
+          const validStatuses = ['Planning', 'Committed', 'Canceled', 'Completed'];
+          if (validStatuses.includes(rawTrip.status)) {
+            normalized.status = rawTrip.status;
+          } else {
+            normalized.status = 'Planning';
+            if (rawTrip.status) {
+              fixes.push(`${tripLabel}: invalid status → set to "Planning"`);
+            }
+          }
+
+          // Todos
+          if (!Array.isArray(rawTrip.todos)) {
+            normalized.todos = [];
+            if (rawTrip.todos !== undefined) {
+              fixes.push(`${tripLabel}: invalid todos → set to []`);
+            }
+          } else {
+            normalized.todos = rawTrip.todos.map((todo, i) =>
+              this.normalizeTodo(todo, tripLabel, i, fixes)
+            );
+          }
+
+          // Expenses
+          if (!Array.isArray(rawTrip.expenses)) {
+            normalized.expenses = [];
+            if (rawTrip.expenses !== undefined) {
+              fixes.push(`${tripLabel}: invalid expenses → set to []`);
+            }
+          } else {
+            normalized.expenses = rawTrip.expenses.map((expense, i) =>
+              this.normalizeExpense(expense, tripLabel, i, fixes)
+            );
+          }
+
+          // Notes
+          normalized.notes = (typeof rawTrip.notes === 'string') ? rawTrip.notes : '';
+
+          return normalized;
+        },
+        // Normalize a todo item
+        normalizeTodo(rawTodo, tripLabel, index, fixes) {
+          const normalized = {};
+          const todoLabel = `${tripLabel} todo ${index + 1}`;
+
+          // ID
+          if (!rawTodo.id || typeof rawTodo.id !== 'number') {
+            normalized.id = this.makeId();
+          } else {
+            normalized.id = rawTodo.id;
+          }
+
+          // Title
+          if (!rawTodo.title || typeof rawTodo.title !== 'string' || !rawTodo.title.trim()) {
+            normalized.title = 'Untitled Task';
+            fixes.push(`${todoLabel}: missing title → set to "Untitled Task"`);
+          } else {
+            normalized.title = rawTodo.title;
+          }
+
+          // Description
+          normalized.description = (typeof rawTodo.description === 'string') ? rawTodo.description : '';
+
+          // Completed
+          normalized.completed = Boolean(rawTodo.completed);
+
+          return normalized;
+        },
+        // Normalize an expense item
+        normalizeExpense(rawExpense, tripLabel, index, fixes) {
+          const normalized = {};
+          const expenseLabel = `${tripLabel} expense ${index + 1}`;
+
+          // ID
+          if (!rawExpense.id || typeof rawExpense.id !== 'number') {
+            normalized.id = this.makeId();
+          } else {
+            normalized.id = rawExpense.id;
+          }
+
+          // Title
+          if (!rawExpense.title || typeof rawExpense.title !== 'string' || !rawExpense.title.trim()) {
+            normalized.title = 'Untitled Expense';
+            fixes.push(`${expenseLabel}: missing title → set to "Untitled Expense"`);
+          } else {
+            normalized.title = rawExpense.title;
+          }
+
+          // Description
+          normalized.description = (typeof rawExpense.description === 'string') ? rawExpense.description : '';
+
+          // Amount
+          const amount = this.safeParseNumber(rawExpense.amount);
+          if (amount === 0 && rawExpense.amount && rawExpense.amount !== 0) {
+            fixes.push(`${expenseLabel}: invalid amount → set to 0`);
+          }
+          normalized.amount = amount;
+
+          // Category
+          const validCategories = ['Lodging', 'Transportation', 'Food', 'Activities', 'Permits', 'Other'];
+          if (validCategories.includes(rawExpense.category)) {
+            normalized.category = rawExpense.category;
+          } else {
+            normalized.category = 'Other';
+            if (rawExpense.category) {
+              fixes.push(`${expenseLabel}: invalid category → set to "Other"`);
+            }
+          }
+
+          return normalized;
+        },
+        selectTrip(trip) {
+          // Guard: check for unsaved changes
+          if (this.unsavedChanges) {
+            this.pendingNavigation = () => {
+              this.selectedTripId = trip.id;
+              window.scrollTo(0, 0);
+            };
+            this.showConfirmModal = true;
+            return;
+          }
+
+          this.selectedTripId = trip.id;
+          window.scrollTo(0, 0);
+        },
+        navigateToList() {
+          // Guard: check for unsaved changes
+          if (this.unsavedChanges) {
+            this.pendingNavigation = () => {
+              this.selectedTripId = null;
+            };
+            this.showConfirmModal = true;
+            return;
+          }
+
+          this.selectedTripId = null;
+        },
+        confirmDiscard() {
+          this.unsavedChanges = false;
+          this.showConfirmModal = false;
+          if (this.pendingNavigation) {
+            this.pendingNavigation();
+            this.pendingNavigation = null;
+          }
+        },
+        cancelDiscard() {
+          this.showConfirmModal = false;
+          this.pendingNavigation = null;
+        },
+        closeFixesModal() {
+          this.showFixesModal = false;
+        },
+        // Todo operations
+        toggleTodoCompleted(todo) {
+          todo.completed = !todo.completed;
+          this.markUnsaved();
+        },
+        openAddTodo() {
+          this.todoModalMode = 'add';
+          this.todoForm = {
+            title: '',
+            description: ''
+          };
+          this.todoFormError = '';
+          this.showTodoModal = true;
+        },
+        openEditTodo(todo) {
+          this.todoModalMode = 'edit';
+          this.editingTodo = todo;
+          this.todoForm = {
+            title: todo.title,
+            description: todo.description || ''
+          };
+          this.todoFormError = '';
+          this.showTodoModal = true;
+        },
+        closeTodoModal() {
+          this.showTodoModal = false;
+          this.todoForm = { title: '', description: '' };
+          this.todoFormError = '';
+          this.editingTodo = null;
+        },
+        submitTodoForm() {
+          // Validate title
+          const title = this.todoForm.title.trim();
+          if (!title) {
+            this.todoFormError = 'Title is required';
+            return;
+          }
+
+          if (this.todoModalMode === 'add') {
+            // Add new todo
+            const newTodo = {
+              id: this.makeId(),
+              title: title,
+              description: this.todoForm.description.trim(),
+              completed: false
+            };
+
+            if (!this.selectedTrip.todos) {
+              this.selectedTrip.todos = [];
+            }
+            this.selectedTrip.todos.push(newTodo);
+          } else {
+            // Edit existing todo
+            this.editingTodo.title = title;
+            this.editingTodo.description = this.todoForm.description.trim();
+          }
+
+          this.markUnsaved();
+          this.closeTodoModal();
+        },
+        openDeleteTodo(todo) {
+          this.deletingTodo = todo;
+          this.showDeleteTodoModal = true;
+        },
+        closeDeleteTodoModal() {
+          this.showDeleteTodoModal = false;
+          this.deletingTodo = null;
+        },
+        confirmDeleteTodo() {
+          if (this.deletingTodo && this.selectedTrip.todos) {
+            const index = this.selectedTrip.todos.findIndex(t => t.id === this.deletingTodo.id);
+            if (index !== -1) {
+              this.selectedTrip.todos.splice(index, 1);
+              this.markUnsaved();
+            }
+          }
+          this.closeDeleteTodoModal();
+        },
+        // Expenses
+        openAddExpense() {
+          this.expenseModalMode = 'add';
+          this.expenseForm = {
+            title: '',
+            description: '',
+            amount: '',
+            category: 'Lodging'
+          };
+          this.expenseFormErrors = {
+            title: '',
+            amount: ''
+          };
+          this.showExpenseModal = true;
+        },
+        openEditExpense(expense) {
+          this.expenseModalMode = 'edit';
+          this.editingExpense = expense;
+          this.expenseForm = {
+            title: expense.title,
+            description: expense.description || '',
+            amount: String(expense.amount),
+            category: expense.category
+          };
+          this.expenseFormErrors = {
+            title: '',
+            amount: ''
+          };
+          this.showExpenseModal = true;
+        },
+        closeExpenseModal() {
+          this.showExpenseModal = false;
+          this.expenseForm = {
+            title: '',
+            description: '',
+            amount: '',
+            category: 'Lodging'
+          };
+          this.expenseFormErrors = {
+            title: '',
+            amount: ''
+          };
+          this.editingExpense = null;
+        },
+        submitExpenseForm() {
+          // Validate title
+          const title = this.expenseForm.title.trim();
+          if (!title) {
+            this.expenseFormErrors.title = 'Title is required';
+            return;
+          } else {
+            this.expenseFormErrors.title = '';
+          }
+
+          // Validate amount
+          const amountStr = String(this.expenseForm.amount).trim();
+          if (amountStr === '' || isNaN(parseFloat(amountStr))) {
+            this.expenseFormErrors.amount = 'Valid amount is required';
+            return;
+          }
+
+          const amount = this.safeParseNumber(this.expenseForm.amount);
+          if (amount < 0) {
+            this.expenseFormErrors.amount = 'Amount must be positive';
+            return;
+          }
+
+          this.expenseFormErrors.amount = '';
+
+          if (this.expenseModalMode === 'add') {
+            // Add new expense
+            const newExpense = {
+              id: this.makeId(),
+              title: title,
+              description: this.expenseForm.description.trim(),
+              amount: amount,
+              category: this.expenseForm.category
+            };
+
+            if (!this.selectedTrip.expenses) {
+              this.selectedTrip.expenses = [];
+            }
+            this.selectedTrip.expenses.push(newExpense);
+          } else {
+            // Edit existing expense
+            this.editingExpense.title = title;
+            this.editingExpense.description = this.expenseForm.description.trim();
+            this.editingExpense.amount = amount;
+            this.editingExpense.category = this.expenseForm.category;
+          }
+
+          this.markUnsaved();
+          this.closeExpenseModal();
+        },
+        openDeleteExpense(expense) {
+          this.deletingExpense = expense;
+          this.showDeleteExpenseModal = true;
+        },
+        closeDeleteExpenseModal() {
+          this.showDeleteExpenseModal = false;
+          this.deletingExpense = null;
+        },
+        confirmDeleteExpense() {
+          if (this.deletingExpense && this.selectedTrip.expenses) {
+            const index = this.selectedTrip.expenses.findIndex(e => e.id === this.deletingExpense.id);
+            if (index !== -1) {
+              this.selectedTrip.expenses.splice(index, 1);
+              this.markUnsaved();
+            }
+          }
+          this.closeDeleteExpenseModal();
+        },
+        // Trip CRUD
+        openNewTrip() {
+          // Check for unsaved changes before opening modal
+          if (this.unsavedChanges) {
+            this.pendingNavigation = () => {
+              this.unsavedChanges = false;
+              this.openNewTrip();
+            };
+            this.showConfirmModal = true;
+            return;
+          }
+
+          this.newTripForm = {
+            name: '',
+            destination: '',
+            startDate: '',
+            endDate: '',
+            status: 'Planning',
+            description: '',
+            notes: ''
+          };
+          this.newTripFormErrors = {
+            name: '',
+            dates: ''
+          };
+          this.showNewTripModal = true;
+        },
+        closeNewTripModal() {
+          this.showNewTripModal = false;
+          this.newTripForm = {
+            name: '',
+            destination: '',
+            startDate: '',
+            endDate: '',
+            status: 'Planning',
+            description: '',
+            notes: ''
+          };
+          this.newTripFormErrors = {
+            name: '',
+            dates: ''
+          };
+        },
+        submitNewTripForm() {
+          // Validate name
+          const name = this.newTripForm.name.trim();
+          if (!name) {
+            this.newTripFormErrors.name = 'Trip name is required';
+            return;
+          } else {
+            this.newTripFormErrors.name = '';
+          }
+
+          // Validate dates (if both present, end >= start)
+          if (this.newTripForm.startDate && this.newTripForm.endDate) {
+            const start = this.parseLocalDate(this.newTripForm.startDate);
+            const end = this.parseLocalDate(this.newTripForm.endDate);
+            if (end < start) {
+              this.newTripFormErrors.dates = 'End date must be after start date';
+              return;
+            } else {
+              this.newTripFormErrors.dates = '';
+            }
+          } else {
+            this.newTripFormErrors.dates = '';
+          }
+
+          // Create new trip
+          const newTrip = {
+            id: this.makeId(),
+            name: name,
+            destination: this.newTripForm.destination.trim(),
+            description: this.newTripForm.description.trim(),
+            startDate: this.newTripForm.startDate,
+            endDate: this.newTripForm.endDate,
+            status: this.newTripForm.status,
+            todos: [],
+            expenses: [],
+            notes: this.newTripForm.notes.trim()
+          };
+
+          // Insert at beginning of trips array
+          this.dataFile.trips.unshift(newTrip);
+
+          // Select the new trip and navigate to detail view
+          this.selectedTripId = newTrip.id;
+
+          // Mark unsaved and close modal
+          this.markUnsaved();
+          this.closeNewTripModal();
+
+          // Show toast
+          this.showToast('Trip created');
+        },
+        openDeleteTrip() {
+          if (this.selectedTrip) {
+            this.deletingTrip = this.selectedTrip;
+            this.showDeleteTripModal = true;
+          }
+        },
+        closeDeleteTripModal() {
+          this.showDeleteTripModal = false;
+          this.deletingTrip = null;
+        },
+        confirmDeleteTrip() {
+          if (this.deletingTrip) {
+            const index = this.trips.findIndex(t => t.id === this.deletingTrip.id);
+            if (index !== -1) {
+              this.trips.splice(index, 1);
+              this.markUnsaved();
+
+              // Navigate back to list view
+              this.selectedTripId = null;
+
+              // Show toast
+              this.showToast('Trip deleted');
+            }
+          }
+          this.closeDeleteTripModal();
+        },
+        duplicateTrip() {
+          if (!this.selectedTrip) return;
+
+          // Check for unsaved changes
+          if (this.unsavedChanges) {
+            this.pendingNavigation = () => {
+              this.unsavedChanges = false;
+              this.duplicateTrip();
+            };
+            this.showConfirmModal = true;
+            return;
+          }
+
+          const original = this.selectedTrip;
+
+          // Deep copy with new IDs and reset rules
+          const duplicated = {
+            id: this.makeId(),
+            name: `Copy of ${original.name}`,
+            destination: original.destination,
+            description: original.description,
+            startDate: original.startDate,
+            endDate: original.endDate,
+            status: 'Planning', // Reset status
+            todos: (original.todos || []).map(todo => ({
+              id: this.makeId(),
+              title: todo.title,
+              description: todo.description || '',
+              completed: false // Reset completion
+            })),
+            expenses: (original.expenses || []).map(expense => ({
+              id: this.makeId(),
+              title: expense.title,
+              description: expense.description || '',
+              amount: expense.amount,
+              category: expense.category
+            })),
+            notes: original.notes || ''
+          };
+
+          // Insert after original trip
+          const originalIndex = this.trips.findIndex(t => t.id === original.id);
+          if (originalIndex !== -1) {
+            this.trips.splice(originalIndex + 1, 0, duplicated);
+          } else {
+            this.trips.push(duplicated);
+          }
+
+          // Select duplicated trip
+          this.selectedTripId = duplicated.id;
+
+          // Mark unsaved
+          this.markUnsaved();
+
+          // Show toast
+          this.showToast('Trip duplicated');
+        },
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(amount || 0);
+        },
+        formatDateRange(startDate, endDate) {
+          if (!startDate) return 'No dates set';
+
+          const options = { month: 'short', day: 'numeric', year: 'numeric' };
+          const start = this.parseLocalDate(startDate).toLocaleDateString('en-US', options);
+
+          if (!endDate) return start;
+
+          const end = this.parseLocalDate(endDate).toLocaleDateString('en-US', options);
+          return `${start} - ${end}`;
+        },
+        onTripStartDateChange() {
+          // If start date is set and end date is empty, set end date = start date
+          if (this.selectedTrip.startDate && !this.selectedTrip.endDate) {
+            this.selectedTrip.endDate = this.selectedTrip.startDate;
+          }
+          this.markUnsaved();
+        },
+        onNewTripStartDateChange() {
+          // If start date is set and end date is empty, set end date = start date
+          if (this.newTripForm.startDate && !this.newTripForm.endDate) {
+            this.newTripForm.endDate = this.newTripForm.startDate;
+          }
+        },
+        toggleTheme() {
+          this.theme = this.theme === 'light' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', this.theme);
+          localStorage.setItem('travelHubTheme', this.theme);
+        },
+        setStatusFilter(status) {
+          this.statusFilter = status;
+          this.saveUIPrefs();
+        },
+        onSortChange() {
+          this.saveUIPrefs();
+        },
+        saveUIPrefs() {
+          const prefs = {
+            statusFilter: this.statusFilter,
+            sortMode: this.sortMode
+          };
+          localStorage.setItem('travelHubUIPrefs', JSON.stringify(prefs));
+        },
+        loadUIPrefs() {
+          try {
+            const stored = localStorage.getItem('travelHubUIPrefs');
+            if (stored) {
+              const prefs = JSON.parse(stored);
+
+              // Validate statusFilter
+              const validStatuses = ['All', 'Planning', 'Committed', 'Canceled', 'Completed'];
+              if (prefs.statusFilter && validStatuses.includes(prefs.statusFilter)) {
+                this.statusFilter = prefs.statusFilter;
+              }
+
+              // Validate sortMode
+              const validSortModes = ['date-soonest', 'date-furthest', 'name-asc', 'name-desc'];
+              if (prefs.sortMode && validSortModes.includes(prefs.sortMode)) {
+                this.sortMode = prefs.sortMode;
+              }
+            }
+          } catch (err) {
+            console.error('Failed to load UI preferences:', err);
+          }
+        },
+        markUnsaved() {
+          this.unsavedChanges = true;
+        },
+        handleBeforeUnload(e) {
+          if (this.unsavedChanges) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+          }
+        },
+        // Open JSON file
+        triggerFileOpen() {
+          this.$refs.fileInput.click();
+        },
+        openJSON(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const data = JSON.parse(e.target.result);
+
+              // Validate basic shape
+              if (typeof data !== 'object' || data === null) {
+                this.showToast('Invalid JSON file', 'error');
+                return;
+              }
+
+              if (!data.trips || !Array.isArray(data.trips)) {
+                this.showToast('File does not contain trips array', 'error');
+                return;
+              }
+
+              // Normalize and track fixes
+              const { dataFile, fixes } = this.normalizeFile(data);
+
+              // Check if imported file has no trips
+              if (dataFile.trips.length === 0) {
+                this.showToast('No trips found in file', 'info');
+                return;
+              }
+
+              // Store pending import data
+              this.pendingImportData = dataFile;
+              this.pendingImportFixes = fixes;
+              this.pendingImportFileName = file.name;
+
+              // If current collection has no trips, open directly
+              if (this.dataFile.trips.length === 0) {
+                this.confirmOpenReplace();
+              } else {
+                // Show open/merge modal
+                this.showOpenMergeModal = true;
+              }
+
+            } catch (error) {
+              console.error('JSON parse error:', error);
+              this.showToast('Invalid JSON file', 'error');
+            }
+          };
+
+          reader.onerror = () => {
+            this.showToast('Error reading file', 'error');
+          };
+
+          reader.readAsText(file);
+          // Reset input so same file can be selected again
+          event.target.value = '';
+        },
+        // Save JSON file
+        saveJSON() {
+          try {
+            // Prepare export data
+            const exportData = {
+              version: '1.0.0',
+              trips: this.dataFile.trips,
+              exportDate: new Date().toISOString()
+            };
+
+            // Create blob and download
+            const json = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            // Generate filename
+            let filename;
+            if (this.lastSavedFileName) {
+              // Reuse the last saved filename for consistency
+              filename = this.lastSavedFileName;
+            } else if (this.currentCollectionName !== 'Untitled') {
+              // Use current collection name if not Untitled
+              filename = `${this.currentCollectionName}.json`;
+            } else {
+              // Generate new filename with current date
+              const today = new Date();
+              const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+              filename = `travel-hub-${dateStr}.json`;
+            }
+
+            // Trigger download (Safari-compatible)
+            // Note: Browser security prevents updating existing files
+            // Each save creates a new download, but we maintain consistent naming
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            // Update collection name and last saved filename
+            this.lastSavedFileName = filename;
+            this.currentCollectionName = this.collectionNameFromFilename(filename);
+            this.unsavedChanges = false;
+            this.showToast(`Saved ${filename} to Downloads folder`, 'success');
+
+          } catch (error) {
+            console.error('Save error:', error);
+            this.showToast('Error saving file', 'error');
+          }
+        },
+        // Helper: Extract collection name from filename
+        collectionNameFromFilename(fileName) {
+          if (!fileName) return 'Untitled';
+          // Remove .json extension (case-insensitive)
+          let name = fileName.replace(/\.json$/i, '').trim();
+          return name || 'Untitled';
+        },
+        // New Collection
+        newCollection() {
+          // Check for unsaved changes
+          if (this.unsavedChanges) {
+            this.pendingNavigation = () => {
+              this.unsavedChanges = false;
+              this.newCollection();
+            };
+            this.showConfirmModal = true;
+            return;
+          }
+
+          // Reset to blank collection
+          this.dataFile = {
+            version: '1.0.0',
+            trips: [],
+            exportDate: null
+          };
+
+          // Reset view state
+          this.currentView = 'list';
+          this.selectedTripId = null;
+          this.currentCollectionName = 'Untitled';
+          this.lastSavedFileName = null;
+          this.unsavedChanges = false;
+
+          this.showToast('New collection created', 'success');
+        },
+        // Load Example Data
+        async loadExampleData() {
+          // Check for unsaved changes
+          if (this.unsavedChanges) {
+            this.pendingNavigation = () => {
+              this.unsavedChanges = false;
+              this.loadExampleData();
+            };
+            this.showConfirmModal = true;
+            return;
+          }
+
+          try {
+            // Fetch example data (relative path)
+            const response = await fetch('./example-data.json', { cache: 'no-store' });
+
+            if (!response.ok) {
+              throw new Error('Failed to fetch');
+            }
+
+            // Parse JSON
+            const data = await response.json();
+
+            // Validate basic shape
+            if (typeof data !== 'object' || data === null) {
+              this.showToast('Invalid example data file', 'error');
+              return;
+            }
+
+            if (!data.trips || !Array.isArray(data.trips)) {
+              this.showToast('Example data does not contain trips array', 'error');
+              return;
+            }
+
+            // Normalize and track fixes
+            const { dataFile, fixes } = this.normalizeFile(data);
+
+            // Check if example file has no trips
+            if (dataFile.trips.length === 0) {
+              this.showToast('No trips found in example data', 'info');
+              return;
+            }
+
+            // Replace current data
+            this.dataFile = dataFile;
+            this.currentView = 'list';
+            this.selectedTripId = null;
+            this.unsavedChanges = true; // User should save a copy
+
+            // Set collection name
+            this.currentCollectionName = 'Example Data';
+            this.lastSavedFileName = null; // Not from a saved file
+
+            // Show toast
+            const tripCount = dataFile.trips.length;
+            const tripWord = tripCount !== 1 ? 'trips' : 'trip';
+
+            if (fixes.length === 0) {
+              this.showToast(`Loaded ${tripCount} example ${tripWord}`, 'success');
+            } else {
+              this.importFixes = fixes;
+              const fixCount = fixes.length;
+              const fixWord = fixCount !== 1 ? 'fixes' : 'fix';
+              this.showToast(`Loaded ${tripCount} example ${tripWord} with ${fixCount} ${fixWord}. View details`, 'warning', () => {
+                this.showFixesModal = true;
+              });
+            }
+
+          } catch (error) {
+            console.error('Failed to load example data:', error);
+            this.showToast('Example data isn\'t available here. Download example-data.json and open it manually.', 'error');
+          }
+        },
+        // Confirm: Open (Replace)
+        confirmOpenReplace() {
+          if (!this.pendingImportData) return;
+
+          // Replace current data
+          this.dataFile = this.pendingImportData;
+          this.currentView = 'list';
+          this.selectedTripId = null;
+          this.unsavedChanges = false;
+
+          // Set collection name and last saved filename
+          this.lastSavedFileName = this.pendingImportFileName;
+          this.currentCollectionName = this.collectionNameFromFilename(this.pendingImportFileName);
+
+          // Show toast
+          const tripCount = this.pendingImportData.trips.length;
+          const tripWord = tripCount !== 1 ? 'trips' : 'trip';
+          const fixes = this.pendingImportFixes;
+
+          if (fixes.length === 0) {
+            this.showToast(`Opened ${tripCount} ${tripWord}`, 'success');
+          } else {
+            this.importFixes = fixes;
+            const fixCount = fixes.length;
+            const fixWord = fixCount !== 1 ? 'fixes' : 'fix';
+            this.showToast(`Opened ${tripCount} ${tripWord} with ${fixCount} ${fixWord}. View details`, 'warning', () => {
+              this.showFixesModal = true;
+            });
+          }
+
+          // Clear pending data and close modal
+          this.pendingImportData = null;
+          this.pendingImportFixes = [];
+          this.pendingImportFileName = null;
+          this.showOpenMergeModal = false;
+
+          // Show file location info on first open
+          try {
+            const hasSeenInfo = localStorage.getItem('travelHubFileLocationInfoSeen');
+            if (!hasSeenInfo) {
+              this.showFileLocationInfoModal = true;
+            }
+          } catch (e) {
+            // Ignore localStorage errors
+          }
+        },
+        // Confirm: Merge
+        confirmOpenMerge() {
+          if (!this.pendingImportData) return;
+
+          const incomingTrips = this.pendingImportData.trips;
+          const existingIds = new Set(this.dataFile.trips.map(t => t.id));
+
+          // Merge trips with ID collision prevention
+          const mergedTrips = incomingTrips.map(trip => {
+            // Check if trip ID collides
+            let newId = trip.id;
+            if (existingIds.has(newId)) {
+              newId = this.makeId();
+            }
+            existingIds.add(newId);
+
+            // Assign new IDs to all todos/expenses to prevent global collisions
+            const newTodos = (trip.todos || []).map(todo => ({
+              ...todo,
+              id: this.makeId()
+            }));
+
+            const newExpenses = (trip.expenses || []).map(expense => ({
+              ...expense,
+              id: this.makeId()
+            }));
+
+            return {
+              ...trip,
+              id: newId,
+              todos: newTodos,
+              expenses: newExpenses
+            };
+          });
+
+          // Append merged trips to current collection
+          this.dataFile.trips.push(...mergedTrips);
+
+          // Keep current collection name (do not overwrite)
+          // Set unsaved changes
+          this.unsavedChanges = true;
+
+          // Show toast
+          const tripCount = mergedTrips.length;
+          const tripWord = tripCount !== 1 ? 'trips' : 'trip';
+          const fixes = this.pendingImportFixes;
+
+          if (fixes.length === 0) {
+            this.showToast(`Merged ${tripCount} ${tripWord}`, 'success');
+          } else {
+            this.importFixes = fixes;
+            const fixCount = fixes.length;
+            const fixWord = fixCount !== 1 ? 'fixes' : 'fix';
+            this.showToast(`Merged ${tripCount} ${tripWord} with ${fixCount} ${fixWord}. View details`, 'warning', () => {
+              this.showFixesModal = true;
+            });
+          }
+
+          // Clear pending data and close modal
+          this.pendingImportData = null;
+          this.pendingImportFixes = [];
+          this.pendingImportFileName = null;
+          this.showOpenMergeModal = false;
+        },
+        // Cancel: Open or Merge
+        cancelOpenMerge() {
+          this.pendingImportData = null;
+          this.pendingImportFixes = [];
+          this.pendingImportFileName = null;
+          this.showOpenMergeModal = false;
+        },
+        // File Location Info Modal
+        closeFileLocationInfo() {
+          this.showFileLocationInfoModal = false;
+          // Mark that user has seen this info
+          try {
+            localStorage.setItem('travelHubFileLocationInfoSeen', 'true');
+          } catch (e) {
+            // Ignore localStorage errors
+          }
+        },
+        // Toast notifications
+        showToast(message, type = 'info', onClick = null) {
+          const id = Date.now();
+          this.toasts.push({ id, message, type, onClick });
+
+          // Auto-remove after 5 seconds (longer for clickable toasts)
+          const duration = onClick ? 5000 : 3000;
+          setTimeout(() => {
+            const index = this.toasts.findIndex(t => t.id === id);
+            if (index !== -1) {
+              this.toasts.splice(index, 1);
+            }
+          }, duration);
+        },
+        handleToastClick(toast) {
+          if (toast.onClick) {
+            toast.onClick();
+            // Remove toast after click
+            const index = this.toasts.findIndex(t => t.id === toast.id);
+            if (index !== -1) {
+              this.toasts.splice(index, 1);
+            }
+          }
+        },
+        openExportMenu() {
+          this.showExportMenu = true;
+          // Add click-outside listener after DOM update
+          this.$nextTick(() => {
+            document.addEventListener('click', this.handleExportMenuClickOutside);
+          });
+        },
+        closeExportMenu() {
+          this.showExportMenu = false;
+          // Always remove listener when closing
+          document.removeEventListener('click', this.handleExportMenuClickOutside);
+        },
+        toggleExportMenu() {
+          if (this.showExportMenu) {
+            this.closeExportMenu();
+          } else {
+            this.openExportMenu();
+          }
+        },
+        handleExportMenuClickOutside(e) {
+          // Close menu if click is outside the dropdown container
+          const dropdown = e.target.closest('.dropdown-container');
+          if (!dropdown) {
+            this.closeExportMenu();
+          }
+        },
+        handleEscapeKey(e) {
+          if (e.key === 'Escape') {
+            if (this.showOpenMergeModal) {
+              this.cancelOpenMerge();
+            } else if (this.showFileLocationInfoModal) {
+              this.closeFileLocationInfo();
+            } else if (this.showDeleteTripModal) {
+              this.closeDeleteTripModal();
+            } else if (this.showNewTripModal) {
+              this.closeNewTripModal();
+            } else if (this.showDeleteExpenseModal) {
+              this.closeDeleteExpenseModal();
+            } else if (this.showExpenseModal) {
+              this.closeExpenseModal();
+            } else if (this.showDeleteTodoModal) {
+              this.closeDeleteTodoModal();
+            } else if (this.showTodoModal) {
+              this.closeTodoModal();
+            } else if (this.showFixesModal) {
+              this.closeFixesModal();
+            } else if (this.showConfirmModal) {
+              this.cancelDiscard();
+            } else if (this.showExportMenu) {
+              this.closeExportMenu();
+            } else if (this.selectedTripId !== null) {
+              // Navigate to list with unsaved guard
+              this.navigateToList();
+            }
+          }
+        },
+        handleKeyboardShortcuts(e) {
+          // Use e.code for reliable key detection with modifiers
+          const key = e.key ? e.key.toLowerCase() : '';
+
+          // Cmd/Ctrl + S: Save - prevent FIRST to block Safari's save dialog
+          if ((e.metaKey || e.ctrlKey) && (key === 's' || e.code === 'KeyS')) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.saveJSON();
+            return;
+          }
+
+          // Cmd/Ctrl + Shift + N: New Trip
+          if ((e.metaKey || e.ctrlKey) && e.shiftKey && (key === 'n' || e.code === 'KeyN')) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.openNewTrip();
+            return;
+          }
+
+          // Don't interfere with typing in inputs/textareas for non-Cmd/Ctrl shortcuts
+          const isTyping = e.target.tagName === 'INPUT' ||
+                          e.target.tagName === 'TEXTAREA' ||
+                          e.target.isContentEditable;
+
+          // / : Focus search (only if not already typing)
+          if (key === '/' && !isTyping) {
+            const searchInput = document.getElementById('tripSearch');
+            if (searchInput && !this.hasOpenModal()) {
+              e.preventDefault();
+              searchInput.focus();
+              return;
+            }
+          }
+        },
+        hasOpenModal() {
+          return this.showOpenMergeModal ||
+                 this.showFileLocationInfoModal ||
+                 this.showNewTripModal ||
+                 this.showDeleteTripModal ||
+                 this.showExpenseModal ||
+                 this.showDeleteExpenseModal ||
+                 this.showTodoModal ||
+                 this.showDeleteTodoModal ||
+                 this.showFixesModal ||
+                 this.showConfirmModal;
+        },
+        // Export helpers
+        sanitizeFilename(name) {
+          if (!name || name.trim() === '') return 'trip';
+          // Lowercase, replace spaces with hyphens, keep only alphanumeric and hyphens
+          return name
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            || 'trip';
+        },
+        escapeHtml(str) {
+          if (!str) return '';
+          const div = document.createElement('div');
+          div.textContent = str;
+          return div.innerHTML;
+        },
+        formatDateForExport(dateStr) {
+          if (!dateStr) return '';
+          const date = this.parseLocalDate(dateStr);
+          const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+          return date.toLocaleDateString('en-US', options);
+        },
+        // ICS helpers
+        formatIcsDate(dateStr) {
+          // Convert YYYY-MM-DD to YYYYMMDD for ICS format
+          if (!dateStr) return '';
+          const date = this.parseLocalDate(dateStr);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}${month}${day}`;
+        },
+        addDays(dateStr, days) {
+          // Add days to a date and return YYYY-MM-DD string
+          const date = this.parseLocalDate(dateStr);
+          date.setDate(date.getDate() + days);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        },
+        escapeIcsText(str) {
+          if (!str) return '';
+          // Escape backslashes, commas, semicolons, and newlines per ICS spec
+          return str
+            .replace(/\\/g, '\\\\')
+            .replace(/,/g, '\\,')
+            .replace(/;/g, '\\;')
+            .replace(/\n/g, '\\n');
+        },
+        exportTripToHTML() {
+          if (!this.selectedTrip) {
+            this.showToast('No trip selected', 'error');
+            return;
+          }
+
+          const trip = this.selectedTrip;
+          const meta = this.computeTripMeta(trip);
+
+          // Generate filename
+          const today = new Date().toISOString().split('T')[0];
+          const filename = `trip-${this.sanitizeFilename(trip.name)}-${today}.html`;
+
+          // Generate HTML content
+          const html = this.generateTripHTML(trip, meta);
+
+          try {
+            // Create blob and download
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            // Create temporary link and click it
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            this.showToast('Exported HTML', 'success');
+          } catch (error) {
+            console.error('Export error:', error);
+            this.showToast('Error exporting trip', 'error');
+          }
+        },
+        exportTripToICS() {
+          if (!this.selectedTrip) {
+            this.showToast('No trip selected', 'error');
+            return;
+          }
+
+          const trip = this.selectedTrip;
+
+          // Check if trip has dates
+          if (!trip.startDate && !trip.endDate) {
+            this.showToast('Trip has no dates', 'error');
+            return;
+          }
+
+          try {
+            // Determine effective start/end dates
+            const effectiveStart = trip.startDate || trip.endDate;
+            const effectiveEnd = trip.endDate || trip.startDate;
+
+            // Format dates for ICS (YYYYMMDD)
+            const dtstart = this.formatIcsDate(effectiveStart);
+            // DTEND must be exclusive for all-day events (+1 day)
+            const dtendDate = this.addDays(effectiveEnd, 1);
+            const dtend = this.formatIcsDate(dtendDate);
+
+            // Generate UID (stable-ish)
+            const uid = `trip-${trip.id}@travelhub.local`;
+
+            // Current timestamp in UTC (YYYYMMDDTHHMMSSZ)
+            const now = new Date();
+            const dtstamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+            // Build description from notes, tasks, and expenses
+            let description = '';
+            if (trip.notes) {
+              description += trip.notes + '\n\n';
+            }
+
+            // Add tasks summary
+            const todos = trip.todos || [];
+            if (todos.length > 0) {
+              description += 'TASKS:\n';
+              todos.forEach(todo => {
+                const checkbox = todo.completed ? '[x]' : '[ ]';
+                description += `${checkbox} ${todo.title}\n`;
+              });
+              description += '\n';
+            }
+
+            // Add expenses summary
+            const expenses = trip.expenses || [];
+            if (expenses.length > 0) {
+              description += 'EXPENSES:\n';
+              let total = 0;
+              expenses.forEach(expense => {
+                const amount = this.safeParseNumber(expense.amount);
+                total += amount;
+                description += `${expense.title}: ${this.formatCurrency(amount)}\n`;
+              });
+              description += `Total: ${this.formatCurrency(total)}\n`;
+            }
+
+            // Escape description for ICS
+            description = this.escapeIcsText(description.trim());
+
+            // Build ICS content with CRLF line endings
+            const icsLines = [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'PRODID:-//Travel Hub//EN',
+              'CALSCALE:GREGORIAN',
+              'METHOD:PUBLISH',
+              'BEGIN:VEVENT',
+              `UID:${uid}`,
+              `DTSTAMP:${dtstamp}`,
+              `DTSTART;VALUE=DATE:${dtstart}`,
+              `DTEND;VALUE=DATE:${dtend}`,
+              `SUMMARY:${this.escapeIcsText(trip.name)}`,
+            ];
+
+            if (trip.destination) {
+              icsLines.push(`LOCATION:${this.escapeIcsText(trip.destination)}`);
+            }
+
+            if (description) {
+              icsLines.push(`DESCRIPTION:${description}`);
+            }
+
+            // Optional: add STATUS if canceled
+            if (trip.status === 'Canceled') {
+              icsLines.push('STATUS:CANCELLED');
+            }
+
+            icsLines.push('END:VEVENT');
+            icsLines.push('END:VCALENDAR');
+
+            // Join with CRLF
+            const icsContent = icsLines.join('\r\n');
+
+            // Generate filename
+            const today = new Date().toISOString().split('T')[0];
+            const filename = `trip-${this.sanitizeFilename(trip.name)}-${today}.ics`;
+
+            // Create blob and download
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            this.showToast('Exported ICS', 'success');
+          } catch (error) {
+            console.error('ICS export error:', error);
+            this.showToast('Error exporting calendar file', 'error');
+          }
+        },
+        async copyTripSummary() {
+          if (!this.selectedTrip) {
+            this.showToast('No trip selected', 'error');
+            return;
+          }
+
+          const trip = this.selectedTrip;
+          const meta = this.computeTripMeta(trip);
+
+          try {
+            // Build rich HTML for Apple Notes
+            let html = `<div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; line-height: 1.5;">`;
+            html += `<div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">${this.escapeHtml(trip.name)}</div>`;
+
+            if (trip.destination || trip.status) {
+              html += `<div style="color: #64748b; margin-bottom: 8px;">`;
+              if (trip.destination) html += this.escapeHtml(trip.destination);
+              if (trip.destination && trip.status) html += ' • ';
+              if (trip.status) html += this.escapeHtml(trip.status);
+              html += `</div>`;
+            }
+
+            if (trip.startDate) {
+              const dateRange = this.formatDateRange(trip.startDate, trip.endDate);
+              html += `<div style="margin-bottom: 8px;">${dateRange}`;
+              if (meta.duration) {
+                html += ` (${meta.duration} day${meta.duration !== 1 ? 's' : ''})`;
+              }
+              html += `</div>`;
+            }
+
+            if (trip.notes) {
+              html += `<div style="margin-top: 16px; font-weight: 600;">Notes</div>`;
+              html += `<div style="margin-bottom: 12px;">${this.escapeHtml(trip.notes).replace(/\n/g, '<br>')}</div>`;
+            }
+
+            const todos = trip.todos || [];
+            if (todos.length > 0) {
+              html += `<div style="margin-top: 16px; font-weight: 600;">Tasks (${meta.completedTodos}/${meta.totalTodos})</div>`;
+              html += `<ul style="margin: 8px 0; padding-left: 20px;">`;
+              todos.forEach(todo => {
+                const style = todo.completed ? 'text-decoration: line-through; color: #94a3b8;' : '';
+                const checkbox = todo.completed ? '✓' : '○';
+                html += `<li style="${style}">${checkbox} ${this.escapeHtml(todo.title)}</li>`;
+              });
+              html += `</ul>`;
+            }
+
+            const expenses = trip.expenses || [];
+            if (expenses.length > 0) {
+              html += `<div style="margin-top: 16px; font-weight: 600;">Expenses</div>`;
+              html += `<ul style="margin: 8px 0; padding-left: 20px;">`;
+              expenses.forEach(expense => {
+                const amount = this.safeParseNumber(expense.amount);
+                html += `<li>${this.escapeHtml(expense.title)}: ${this.formatCurrency(amount)}`;
+                if (expense.category) html += ` (${this.escapeHtml(expense.category)})`;
+                html += `</li>`;
+              });
+              html += `</ul>`;
+              html += `<div style="margin-top: 8px; font-weight: 600;">Total: ${this.formatCurrency(meta.totalBudget)}</div>`;
+            }
+
+            html += `</div>`;
+
+            // Build plain text fallback
+            let plainText = trip.name + '\n';
+            if (trip.destination) plainText += trip.destination + '\n';
+            if (trip.status) plainText += trip.status + '\n';
+            if (trip.startDate) {
+              const dateRange = this.formatDateRange(trip.startDate, trip.endDate);
+              plainText += dateRange;
+              if (meta.duration) plainText += ` (${meta.duration} days)`;
+              plainText += '\n';
+            }
+            if (trip.notes) plainText += '\n' + trip.notes + '\n';
+            if (todos.length > 0) {
+              plainText += `\nTasks (${meta.completedTodos}/${meta.totalTodos}):\n`;
+              todos.forEach(todo => {
+                const checkbox = todo.completed ? '[x]' : '[ ]';
+                plainText += `  ${checkbox} ${todo.title}\n`;
+              });
+            }
+            if (expenses.length > 0) {
+              plainText += '\nExpenses:\n';
+              expenses.forEach(expense => {
+                const amount = this.safeParseNumber(expense.amount);
+                plainText += `  ${expense.title}: ${this.formatCurrency(amount)}\n`;
+              });
+              plainText += `Total: ${this.formatCurrency(meta.totalBudget)}\n`;
+            }
+
+            // Try modern Clipboard API with rich text
+            if (navigator.clipboard && window.ClipboardItem) {
+              try {
+                const blob = new Blob([html], { type: 'text/html' });
+                const textBlob = new Blob([plainText], { type: 'text/plain' });
+                const clipboardItem = new ClipboardItem({
+                  'text/html': blob,
+                  'text/plain': textBlob
+                });
+                await navigator.clipboard.write([clipboardItem]);
+                this.showToast('Copied summary', 'success');
+                return;
+              } catch (err) {
+                console.warn('ClipboardItem failed, trying fallback:', err);
+              }
+            }
+
+            // Fallback: contenteditable + execCommand
+            try {
+              const div = document.createElement('div');
+              div.contentEditable = true;
+              div.style.position = 'fixed';
+              div.style.left = '-9999px';
+              div.innerHTML = html;
+              document.body.appendChild(div);
+
+              const selection = window.getSelection();
+              const range = document.createRange();
+              range.selectNodeContents(div);
+              selection.removeAllRanges();
+              selection.addRange(range);
+
+              const success = document.execCommand('copy');
+              document.body.removeChild(div);
+
+              if (success) {
+                this.showToast('Copied summary', 'success');
+                return;
+              }
+            } catch (err) {
+              console.warn('contenteditable fallback failed:', err);
+            }
+
+            // Final fallback: plain text only
+            const textarea = document.createElement('textarea');
+            textarea.value = plainText;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            const success = document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            if (success) {
+              this.showToast('Copied summary (plain text)', 'success');
+            } else {
+              throw new Error('All copy methods failed');
+            }
+          } catch (error) {
+            console.error('Copy error:', error);
+            this.showToast('Copy failed (browser blocked)', 'error');
+          }
+        },
+        async copyAllTrips() {
+          const trips = this.visibleTrips && this.visibleTrips.length > 0
+            ? this.visibleTrips
+            : this.tripsWithMetadata;
+
+          if (trips.length === 0) {
+            this.showToast('No trips to copy', 'error');
+            return;
+          }
+
+          try {
+            // Build rich HTML for Apple Notes
+            let html = `<div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; line-height: 1.5;">`;
+            html += `<div style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Travel Hub — All Trips</div>`;
+
+            trips.forEach((trip, index) => {
+              const meta = this.computeTripMeta(trip);
+
+              if (index > 0) {
+                html += `<hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">`;
+              }
+
+              html += `<div style="margin-bottom: 16px;">`;
+              html += `<div style="font-weight: 600; font-size: 16px;">${this.escapeHtml(trip.name)}</div>`;
+
+              if (trip.destination || trip.status) {
+                html += `<div style="color: #64748b; font-size: 13px; margin-top: 4px;">`;
+                if (trip.destination) html += this.escapeHtml(trip.destination);
+                if (trip.destination && trip.status) html += ' • ';
+                if (trip.status) html += this.escapeHtml(trip.status);
+                html += `</div>`;
+              }
+
+              if (trip.startDate) {
+                const dateRange = this.formatDateRange(trip.startDate, trip.endDate);
+                html += `<div style="font-size: 13px; color: #64748b; margin-top: 4px;">${dateRange}`;
+                if (meta.duration) {
+                  html += ` (${meta.duration} day${meta.duration !== 1 ? 's' : ''})`;
+                }
+                html += `</div>`;
+              }
+
+              html += `<div style="font-size: 13px; margin-top: 4px;">`;
+              html += `Tasks: ${meta.completedTodos}/${meta.totalTodos} • `;
+              html += `Budget: ${this.formatCurrency(meta.totalBudget)}`;
+              html += `</div>`;
+              html += `</div>`;
+            });
+
+            html += `</div>`;
+
+            // Build plain text fallback
+            let plainText = 'Travel Hub — All Trips\n\n';
+            trips.forEach((trip, index) => {
+              const meta = this.computeTripMeta(trip);
+
+              if (index > 0) plainText += '\n---\n\n';
+
+              plainText += trip.name + '\n';
+              if (trip.destination) plainText += trip.destination + '\n';
+              if (trip.status) plainText += trip.status + '\n';
+              if (trip.startDate) {
+                const dateRange = this.formatDateRange(trip.startDate, trip.endDate);
+                plainText += dateRange;
+                if (meta.duration) plainText += ` (${meta.duration} days)`;
+                plainText += '\n';
+              }
+              plainText += `Tasks: ${meta.completedTodos}/${meta.totalTodos} • Budget: ${this.formatCurrency(meta.totalBudget)}\n`;
+            });
+
+            // Try modern Clipboard API with rich text
+            if (navigator.clipboard && window.ClipboardItem) {
+              try {
+                const blob = new Blob([html], { type: 'text/html' });
+                const textBlob = new Blob([plainText], { type: 'text/plain' });
+                const clipboardItem = new ClipboardItem({
+                  'text/html': blob,
+                  'text/plain': textBlob
+                });
+                await navigator.clipboard.write([clipboardItem]);
+                this.showToast(`Copied ${trips.length} trips`, 'success');
+                return;
+              } catch (err) {
+                console.warn('ClipboardItem failed, trying fallback:', err);
+              }
+            }
+
+            // Fallback: contenteditable + execCommand
+            try {
+              const div = document.createElement('div');
+              div.contentEditable = true;
+              div.style.position = 'fixed';
+              div.style.left = '-9999px';
+              div.innerHTML = html;
+              document.body.appendChild(div);
+
+              const selection = window.getSelection();
+              const range = document.createRange();
+              range.selectNodeContents(div);
+              selection.removeAllRanges();
+              selection.addRange(range);
+
+              const success = document.execCommand('copy');
+              document.body.removeChild(div);
+
+              if (success) {
+                this.showToast(`Copied ${trips.length} trips`, 'success');
+                return;
+              }
+            } catch (err) {
+              console.warn('contenteditable fallback failed:', err);
+            }
+
+            // Final fallback: plain text only
+            const textarea = document.createElement('textarea');
+            textarea.value = plainText;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            const success = document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            if (success) {
+              this.showToast(`Copied ${trips.length} trips (plain text)`, 'success');
+            } else {
+              throw new Error('All copy methods failed');
+            }
+          } catch (error) {
+            console.error('Copy all trips error:', error);
+            this.showToast('Copy failed (browser blocked)', 'error');
+          }
+        },
+        exportAllTripsToHTML() {
+          const trips = this.visibleTrips && this.visibleTrips.length > 0
+            ? this.visibleTrips
+            : this.tripsWithMetadata;
+
+          if (trips.length === 0) {
+            this.showToast('No trips to export', 'error');
+            return;
+          }
+
+          try {
+            const now = new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit'
+            });
+
+            // Build TOC by year
+            const tripsByYear = {};
+            trips.forEach((trip, index) => {
+              const effectiveDateStr = trip.startDate || trip.endDate;
+              let year = 'No Date';
+              if (effectiveDateStr) {
+                const date = this.parseLocalDate(effectiveDateStr);
+                year = date.getFullYear().toString();
+              }
+              if (!tripsByYear[year]) {
+                tripsByYear[year] = [];
+              }
+              tripsByYear[year].push({ trip, index });
+            });
+
+            // Sort years
+            const sortedYears = Object.keys(tripsByYear).sort((a, b) => {
+              if (a === 'No Date') return 1;
+              if (b === 'No Date') return -1;
+              return b - a; // Descending
+            });
+
+            // Build TOC HTML
+            let tocHTML = '<ul class="toc-list">';
+            sortedYears.forEach(year => {
+              tocHTML += `<li class="toc-year"><strong>${year}</strong><ul>`;
+              tripsByYear[year].forEach(({ trip, index }) => {
+                tocHTML += `<li><a href="#trip-${index}">${this.escapeHtml(trip.name)}</a></li>`;
+              });
+              tocHTML += `</ul></li>`;
+            });
+            tocHTML += '</ul>';
+
+            // Build trip sections HTML
+            let tripsHTML = '';
+            trips.forEach((trip, index) => {
+              const meta = this.computeTripMeta(trip);
+
+              // Date range
+              let dateRangeDisplay = '';
+              if (trip.startDate) {
+                const startFormatted = this.formatDateForExport(trip.startDate);
+                const endFormatted = trip.endDate ? this.formatDateForExport(trip.endDate) : '';
+                if (trip.endDate && trip.endDate !== trip.startDate) {
+                  dateRangeDisplay = `${startFormatted} – ${endFormatted}`;
+                } else {
+                  dateRangeDisplay = startFormatted;
+                }
+              }
+
+              tripsHTML += `
+              <div class="trip-section" id="trip-${index}">
+                <h2>${this.escapeHtml(trip.name)}</h2>
+                ${trip.destination ? `<div class="trip-meta">${this.escapeHtml(trip.destination)}</div>` : ''}
+                <div class="trip-meta">
+                  <span class="status-badge ${trip.status.toLowerCase()}">${this.escapeHtml(trip.status)}</span>
+                  ${dateRangeDisplay ? `<span>${dateRangeDisplay}</span>` : ''}
+                  ${meta.duration ? `<span>${meta.duration} day${meta.duration !== 1 ? 's' : ''}</span>` : ''}
+                </div>
+
+                ${trip.notes ? `
+                <div class="subsection">
+                  <h3>Notes</h3>
+                  <p>${this.escapeHtml(trip.notes).replace(/\n/g, '<br>')}</p>
+                </div>
+                ` : ''}
+
+                <div class="subsection">
+                  <h3>Tasks (${meta.completedTodos}/${meta.totalTodos})</h3>
+                  ${(trip.todos && trip.todos.length > 0) ? `
+                    <ul class="compact-list">
+                      ${trip.todos.map(todo => `
+                        <li ${todo.completed ? 'style="text-decoration: line-through; color: #94a3b8;"' : ''}>
+                          ${todo.completed ? '✓' : '○'} ${this.escapeHtml(todo.title)}
+                        </li>
+                      `).join('')}
+                    </ul>
+                  ` : '<p class="empty">No tasks</p>'}
+                </div>
+
+                <div class="subsection">
+                  <h3>Expenses (${this.formatCurrency(meta.totalBudget)})</h3>
+                  ${(trip.expenses && trip.expenses.length > 0) ? `
+                    <ul class="compact-list">
+                      ${trip.expenses.map(expense => {
+                        const amount = this.safeParseNumber(expense.amount);
+                        return `<li>${this.escapeHtml(expense.title)}: ${this.formatCurrency(amount)}</li>`;
+                      }).join('')}
+                    </ul>
+                  ` : '<p class="empty">No expenses</p>'}
+                </div>
+              </div>
+              `;
+            });
+
+            // Generate complete HTML
+            const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Travel Hub — All Trips</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #334155;
+      background: #ffffff;
+      padding: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+    .export-info {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-bottom: 32px;
+    }
+    .toc {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 48px;
+    }
+    .toc h2 {
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+      color: #1e293b;
+    }
+    .toc-list { list-style: none; }
+    .toc-year { margin-bottom: 16px; }
+    .toc-year > strong { color: #1e293b; }
+    .toc-year > ul {
+      list-style: none;
+      margin-top: 8px;
+      margin-left: 16px;
+    }
+    .toc-year > ul > li {
+      margin-bottom: 4px;
+    }
+    .toc a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .toc a:hover {
+      text-decoration: underline;
+    }
+    .trip-section {
+      border-top: 2px solid #e2e8f0;
+      padding-top: 32px;
+      margin-top: 32px;
+      page-break-inside: avoid;
+    }
+    .trip-section:first-of-type {
+      border-top: none;
+      margin-top: 0;
+    }
+    .trip-section h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+    .trip-meta {
+      color: #64748b;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-badge.planning { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+    .status-badge.committed { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .status-badge.canceled { background: rgba(107, 114, 128, 0.1); color: #6b7280; }
+    .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .subsection {
+      margin-top: 24px;
+    }
+    .subsection h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+    .compact-list {
+      list-style: none;
+      margin-left: 0;
+      padding-left: 20px;
+    }
+    .compact-list li {
+      margin-bottom: 4px;
+    }
+    .empty {
+      color: #94a3b8;
+      font-style: italic;
+    }
+    @media print {
+      body { padding: 0; max-width: none; }
+      .trip-section { page-break-before: auto; page-break-after: auto; page-break-inside: avoid; }
+      .toc { page-break-after: always; }
+    }
+    @media (max-width: 640px) {
+      body { padding: 16px; }
+      h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Travel Hub — All Trips</h1>
+  <div class="export-info">Exported ${trips.length} trip${trips.length !== 1 ? 's' : ''} on ${now}</div>
+
+  <div class="toc">
+    <h2>Table of Contents</h2>
+    ${tocHTML}
+  </div>
+
+  ${tripsHTML}
+</body>
+</html>`;
+
+            // Generate filename
+            const today = new Date().toISOString().split('T')[0];
+            const filename = `travel-hub-all-trips-${today}.html`;
+
+            // Create blob and download
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            this.showToast(`Exported ${trips.length} trips`, 'success');
+          } catch (error) {
+            console.error('Export all trips error:', error);
+            this.showToast('Error exporting trips', 'error');
+          }
+        },
+        generateTripHTML(trip, meta) {
+          const now = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+          });
+
+          // Format dates
+          const startDateFormatted = trip.startDate ? this.formatDateForExport(trip.startDate) : '';
+          const endDateFormatted = trip.endDate ? this.formatDateForExport(trip.endDate) : '';
+
+          // Build date range display
+          let dateRangeDisplay = '';
+          if (trip.startDate) {
+            if (trip.endDate && trip.endDate !== trip.startDate) {
+              dateRangeDisplay = `${startDateFormatted} – ${endDateFormatted}`;
+            } else {
+              dateRangeDisplay = startDateFormatted;
+            }
+          }
+
+          // Duration display
+          const durationDisplay = meta.duration ? `${meta.duration} day${meta.duration !== 1 ? 's' : ''}` : '';
+
+          // Todos section
+          const todos = trip.todos || [];
+          let todosHTML = '';
+          if (todos.length > 0) {
+            todosHTML = todos.map(todo => `
+              <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                <span class="checkbox">${todo.completed ? '✓' : ' '}</span>
+                <span class="todo-text">${this.escapeHtml(todo.title)}</span>
+                ${todo.description ? `<div class="todo-description">${this.escapeHtml(todo.description)}</div>` : ''}
+              </li>
+            `).join('');
+          } else {
+            todosHTML = '<p class="empty-message">No tasks added</p>';
+          }
+
+          // Expenses section
+          const expenses = trip.expenses || [];
+          let expensesHTML = '';
+          let categoryTotals = {};
+
+          if (expenses.length > 0) {
+            expensesHTML = expenses.map(expense => {
+              const amount = this.safeParseNumber(expense.amount);
+              const category = expense.category || 'Other';
+
+              // Track category totals
+              categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+
+              return `
+              <tr>
+                <td>
+                  <div class="expense-title">${this.escapeHtml(expense.title)}</div>
+                  ${expense.description ? `<div class="expense-description">${this.escapeHtml(expense.description)}</div>` : ''}
+                </td>
+                <td>${this.escapeHtml(category)}</td>
+                <td class="amount">${this.formatCurrency(amount)}</td>
+              </tr>
+              `;
+            }).join('');
+          } else {
+            expensesHTML = '<tr><td colspan="3" class="empty-message">No expenses added</td></tr>';
+          }
+
+          // Category subtotals
+          let categorySubtotalsHTML = '';
+          if (Object.keys(categoryTotals).length > 0) {
+            const sortedCategories = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+            categorySubtotalsHTML = `
+              <div class="category-subtotals">
+                <h3>By Category</h3>
+                <ul>
+                  ${sortedCategories.map(([cat, total]) =>
+                    `<li><span class="category-name">${this.escapeHtml(cat)}</span><span class="category-total">${this.formatCurrency(total)}</span></li>`
+                  ).join('')}
+                </ul>
+              </div>
+            `;
+          }
+
+          // Notes with preserved newlines
+          const notesHTML = trip.notes
+            ? this.escapeHtml(trip.notes).replace(/\n/g, '<br>')
+            : '<p class="empty-message">No notes added</p>';
+
+          // Generate complete HTML document
+          return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${this.escapeHtml(trip.name)} - Travel Hub Export</title>
+  <style>
+    /* Reset & Base */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #334155;
+      background: #ffffff;
+      padding: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .destination {
+      font-size: 1.25rem;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .status-badge.planning { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+    .status-badge.committed { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .status-badge.canceled { background: rgba(107, 114, 128, 0.1); color: #6b7280; }
+    .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+    .date-range {
+      font-size: 1rem;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+
+    .export-info {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-top: 16px;
+    }
+
+    /* Summary Box */
+    .summary {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .summary-item {
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #334155;
+      margin: 16px 0 8px;
+    }
+
+    .notes {
+      color: #334155;
+      white-space: pre-wrap;
+    }
+
+    /* Tasks List */
+    .todo-list {
+      list-style: none;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .todo-item:last-child {
+      border-bottom: none;
+    }
+
+    .checkbox {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #cbd5e1;
+      border-radius: 4px;
+      margin-right: 12px;
+      flex-shrink: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: #10b981;
+    }
+
+    .todo-item.completed .checkbox {
+      background: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    .todo-description {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 4px;
+      margin-left: 32px;
+    }
+
+    .todo-item.completed .todo-description {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    /* Expenses Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    td.amount {
+      text-align: right;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .expense-title {
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .expense-description {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .table-total {
+      text-align: right;
+      font-weight: 700;
+      color: #1e293b;
+      padding: 16px 12px;
+      border-top: 2px solid #334155;
+      font-size: 1.125rem;
+    }
+
+    /* Category Subtotals */
+    .category-subtotals {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .category-subtotals h3 {
+      margin: 0 0 12px;
+      border: none;
+      padding: 0;
+    }
+
+    .category-subtotals ul {
+      list-style: none;
+    }
+
+    .category-subtotals li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .category-subtotals li:last-child {
+      border-bottom: none;
+    }
+
+    .category-name {
+      color: #64748b;
+    }
+
+    .category-total {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    /* Empty States */
+    .empty-message {
+      color: #94a3b8;
+      font-style: italic;
+      padding: 16px;
+      text-align: center;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        padding: 0;
+        max-width: none;
+      }
+
+      .header {
+        page-break-after: avoid;
+      }
+
+      .section {
+        page-break-inside: avoid;
+      }
+
+      .todo-item, tr {
+        page-break-inside: avoid;
+      }
+
+      table { page-break-inside: auto; }
+      tr    { page-break-inside: avoid; page-break-after: auto; }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        font-size: 0.875rem;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>${this.escapeHtml(trip.name)}</h1>
+    ${trip.destination ? `<div class="destination">${this.escapeHtml(trip.destination)}</div>` : ''}
+    <div class="status-badge ${trip.status.toLowerCase()}">${this.escapeHtml(trip.status)}</div>
+    ${dateRangeDisplay ? `<div class="date-range">${dateRangeDisplay}</div>` : ''}
+    ${durationDisplay ? `<div class="date-range">${durationDisplay}</div>` : ''}
+    <div class="export-info">Exported from Travel Hub on ${now}</div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-item">
+      <div class="summary-label">Tasks</div>
+      <div class="summary-value">${meta.completedTodos}/${meta.totalTodos}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Total Budget</div>
+      <div class="summary-value">${this.formatCurrency(meta.totalBudget)}</div>
+    </div>
+  </div>
+
+  ${trip.notes ? `
+  <div class="section">
+    <h2>Notes</h2>
+    <div class="notes">${notesHTML}</div>
+  </div>
+  ` : ''}
+
+  <div class="section">
+    <h2>Tasks</h2>
+    ${todos.length > 0 ? `<ul class="todo-list">${todosHTML}</ul>` : todosHTML}
+  </div>
+
+  <div class="section">
+    <h2>Expenses</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th style="text-align: right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${expensesHTML}
+      </tbody>
+    </table>
+    ${expenses.length > 0 ? `<div class="table-total">Total: ${this.formatCurrency(meta.totalBudget)}</div>` : ''}
+    ${categorySubtotalsHTML}
+  </div>
+</body>
+</html>`;
+        },
+        initTheme() {
+          // Check localStorage first, then system preference
+          const stored = localStorage.getItem('travelHubTheme');
+          if (stored) {
+            this.theme = stored;
+          } else {
+            // Check system preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            this.theme = prefersDark ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', this.theme);
+        }
+      },
+      mounted() {
+        // Initialize theme
+        this.initTheme();
+
+        // Load UI preferences (filter/sort)
+        this.loadUIPrefs();
+
+        // Add keyboard event listeners (stored as named functions for cleanup)
+        document.addEventListener('keydown', this.handleEscapeKey);
+        // Use capture phase (true) to intercept Cmd+S/Cmd+N before Safari handles them
+        document.addEventListener('keydown', this.handleKeyboardShortcuts, true);
+      },
+      beforeUnmount() {
+        // Cleanup event listeners (must match addEventListener parameters)
+        document.removeEventListener('keydown', this.handleEscapeKey);
+        document.removeEventListener('keydown', this.handleKeyboardShortcuts, true);
+        window.removeEventListener('beforeunload', this.handleBeforeUnload);
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
