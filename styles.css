@@ -1,13 +1,28 @@
+/*
+  Travel Hub — Personal Travel Planning
+  © 2026 Troutdog Adventures. All rights reserved.
+  Replace with your preferred license text (MIT / Apache-2.0 / etc.).
+*/
+
 /* ============================================
    Travel Hub - Design Tokens & Styles
    v1.0.0 - Phase 1 Foundation + Dark Mode
    ============================================ */
+
+/* v-cloak: hide the entire app shell until Vue has compiled and mounted.
+   Without this, the raw HTML template (including all v-if-gated modals)
+   is briefly visible as plain HTML before Vue processes the directives.
+   Vue removes [v-cloak] after mount, making the app appear instantly. */
+[v-cloak] { display: none !important; }
 
 /* ============================================
    CSS Variables (Design Tokens) - Light Theme (Default)
    ============================================ */
 
 :root {
+  /* Layout */
+  --sidebar-width: 260px;
+
   /* Theme Colors - Light */
   --bg: #f8fafc;
   --surface: #ffffff;
@@ -28,6 +43,8 @@
   --color-info: #3b82f6;
 
   /* Status Badge Colors */
+  --badge-idea-bg: rgba(20, 184, 166, 0.1);
+  --badge-idea-text: #14b8a6;
   --badge-planning-bg: rgba(37, 99, 235, 0.1);
   --badge-planning-text: #2563eb;
   --badge-committed-bg: rgba(16, 185, 129, 0.1);
@@ -55,8 +72,10 @@
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
   --space-12: 48px;
 
   /* Border Radius */
@@ -76,6 +95,17 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
+
+  /* ── Overlay polish tokens ───────────────────────────────────────────────── */
+  --overlay-panel-bg: #e4ecf6;           /* grounded blue-gray — darkest layer */
+  --overlay-secondary-card-bg: #eaf0f9; /* secondary cards: close to panel */
+  --overlay-border: #d5e0ef;             /* slightly stronger border overall */
+  --overlay-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --overlay-shadow-primary: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --overlay-radius: 14px;
+  --overlay-radius-primary: 16px;
+  --overlay-field-glow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+  --overlay-label-color: #7a8799;
 }
 
 /* ============================================
@@ -120,6 +150,16 @@
   /* Focus & Overlays (dark mode) */
   --focus-ring: rgba(59, 130, 246, 0.6);
   --overlay: rgba(0, 0, 0, 0.7);
+
+  /* ── Overlay polish tokens (dark) ────────────────────────────────────────── */
+  --overlay-panel-bg: hsl(215, 30%, 12%);          /* darkest — panel backdrop */
+  --overlay-secondary-card-bg: hsl(215, 25%, 16%); /* secondary cards: close to panel */
+  --overlay-border: rgba(255, 255, 255, 0.09);
+  --overlay-shadow-card: 0 1px 4px rgba(0, 0, 0, 0.30);
+  --overlay-shadow-primary: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --overlay-radius-primary: 16px;
+  --overlay-field-glow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  --overlay-label-color: #7a8ea8;
 }
 
 /* ============================================
@@ -274,32 +314,6 @@ h3 {
   flex-wrap: wrap;
 }
 
-.header__collection {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-width: 0;
-}
-
-.collection-name {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-muted);
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.collection-unsaved-indicator {
-  font-size: var(--font-size-xs);
-  color: var(--color-warning);
-}
-
 /* Mobile header adjustments */
 @media (max-width: 767px) {
   .header {
@@ -312,15 +326,6 @@ h3 {
 
   .header__content {
     gap: var(--space-3);
-  }
-
-  .header__collection {
-    flex-basis: 100%;
-    order: 2;
-  }
-
-  .collection-name {
-    max-width: 100%;
   }
 }
 
@@ -465,6 +470,42 @@ h3 {
   border-color: var(--color-primary-hover);
 }
 
+/* History Toggle */
+.history-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 32px;
+  white-space: nowrap;
+  margin-left: var(--space-2);
+}
+
+.history-toggle:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.history-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.history-toggle--active {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-style: solid;
+  border-color: var(--border-hover);
+}
+
 /* Sort Control */
 .sort-control {
   display: flex;
@@ -493,6 +534,51 @@ h3 {
 }
 
 /* ============================================
+   Component: Quick-Add
+   ============================================ */
+
+.quick-add {
+  margin-bottom: var(--space-6);
+}
+
+.quick-add__prompt {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+  text-align: center;
+}
+
+.quick-add__input-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.quick-add__input {
+  flex: 1;
+  padding: var(--space-3);
+  font-size: 16px; /* Prevent iOS zoom */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  transition: all var(--transition-fast);
+}
+
+.quick-add__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.quick-add__input::placeholder {
+  color: var(--text-muted);
+}
+
+.quick-add__button {
+  min-width: 80px;
+}
+
+/* ============================================
    Component: Buttons
    ============================================ */
 
@@ -500,13 +586,14 @@ h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 20px;
+  gap: var(--space-2);
+  padding: 12px 24px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
   text-decoration: none;
   min-height: 44px;
   white-space: nowrap;
@@ -520,14 +607,17 @@ h3 {
 .btn--primary {
   background: var(--color-primary);
   color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(37, 99, 235, 0.18);
 }
 
 .btn--primary:hover {
   background: var(--color-primary-hover);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(37, 99, 235, 0.22);
+  transform: translateY(-1px);
 }
 
 .btn--secondary {
-  background: transparent;
+  background: var(--surface);
   color: var(--color-primary);
   border-color: var(--border);
 }
@@ -535,15 +625,19 @@ h3 {
 .btn--secondary:hover {
   background: var(--surface-hover);
   border-color: var(--border-hover);
+  transform: translateY(-1px);
 }
 
 .btn--danger {
-  background: var(--color-error);
+  background: #e05c5c;
   color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(224, 92, 92, 0.15);
 }
 
 .btn--danger:hover {
-  background: var(--color-error-hover);
+  background: #cc4444;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(224, 92, 92, 0.2);
+  transform: translateY(-1px);
 }
 
 .btn--sm {
@@ -690,7 +784,7 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-6);
+  padding: var(--space-4) var(--space-5);
   cursor: pointer;
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
@@ -722,25 +816,31 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
 }
 
 .trip-card__destination {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .trip-card__dates {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.trip-card__no-date {
+  font-style: italic;
+  opacity: 0.6;
 }
 
 .trip-card__footer {
   display: flex;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding-top: var(--space-4);
+  gap: var(--space-3);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--border);
   font-size: var(--font-size-sm);
   color: var(--text-muted);
+  margin-top: var(--space-2);
 }
 
 /* ============================================
@@ -772,9 +872,25 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
   color: var(--badge-canceled-text);
 }
 
+.badge--canceled::before {
+  content: '— ';
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
 .badge--completed {
   background: var(--badge-completed-bg);
   color: var(--badge-completed-text);
+}
+
+.badge--completed::before {
+  content: '✓ ';
+  font-weight: var(--font-weight-bold);
+}
+
+.badge--idea {
+  background: var(--badge-idea-bg);
+  color: var(--badge-idea-text);
 }
 
 .badge--secondary {
@@ -923,7 +1039,8 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
 .calendar-year__divider {
   border: none;
   border-top: 2px solid var(--border);
-  margin: var(--space-6) 0;
+  margin: var(--space-6) 0 var(--space-4) 0;
+  opacity: 0.9;
 }
 
 .calendar-year__header {
@@ -931,9 +1048,51 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
 }
 
 .calendar-year__title {
-  font-size: var(--font-size-2xl);
+  font-size: 2.25rem;
   font-weight: var(--font-weight-bold);
   color: var(--heading);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* Year header: title + "This year" chip in one row */
+.calendar-year__title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* "This year" pill — shown only for current year */
+.calendar-year__chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 20px;
+  padding: 2px 10px;
+  line-height: 1.6;
+}
+
+[data-theme="dark"] .calendar-year__chip {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+/* Future-year helper subtext — shown only for years beyond current year */
+.calendar-year__future-hint {
+  margin: 4px 0 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-style: italic;
+  opacity: 0.7;
+  letter-spacing: 0;
 }
 
 .calendar-quarters {
@@ -962,6 +1121,7 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   min-height: 120px;
 }
 
@@ -981,6 +1141,22 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--heading);
+}
+
+/* Title group: Q-label + month range inline */
+.calendar-quarter__title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+/* Month range sublabel (e.g. "Jan–Mar") */
+.calendar-quarter__months {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-muted);
+  opacity: 0.85;
+  letter-spacing: 0;
 }
 
 .calendar-quarter__count {
@@ -1023,18 +1199,12 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
 }
 
 .calendar-trip {
-  padding: var(--space-3);
-  background: var(--bg);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
-}
-
-.calendar-trip:hover {
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .calendar-trip:focus-visible {
@@ -1047,6 +1217,11 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
   color: var(--heading);
   margin-bottom: var(--space-1);
   font-size: var(--font-size-base);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
 }
 
 .calendar-trip__destination {
@@ -1071,9 +1246,18 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
   margin-top: var(--space-6);
 }
 
-.calendar-quarter--nodate {
-  max-width: 600px;
-  margin: 0 auto;
+/* Undated section: inline label row above the grid */
+.calendar-nodate-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.calendar-nodate-header__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--heading);
 }
 
 /* ============================================
@@ -1177,6 +1361,7 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
 }
 
 .detail-section__header {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1752,3 +1937,5500 @@ input[type="date"].input--empty::-webkit-calendar-picker-indicator {
     transform: none;
   }
 }
+
+/* ============================================
+   Step 6: Tap-to-Edit (Inline Editing)
+   ============================================ */
+
+/* Trip field display (read-only, clickable) */
+.trip-field-display {
+  min-height: 44px; /* iOS 44px touch target */
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.15s, border-color 0.15s;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.trip-field-display:hover,
+.trip-field-display:focus {
+  background-color: var(--surface-hover);
+  border-color: var(--border-hover);
+  outline: none;
+}
+
+.trip-field-display--placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Multiline display (description) */
+.trip-field-display--multiline {
+  align-items: flex-start;
+  min-height: 72px;
+  white-space: pre-wrap;
+}
+
+/* Ensure all inline inputs meet iOS 16px minimum to prevent zoom */
+.trip-field-input-active {
+  font-size: max(16px, 1rem) !important;
+}
+
+/* Inline error message */
+.inline-error {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-error, #dc2626);
+}
+
+/* Todo: editable title cursor hint */
+.todo-title--editable {
+  cursor: pointer;
+}
+
+.todo-title--editable:hover .todo-title {
+  text-decoration: underline dotted var(--text-muted);
+}
+
+/* Todo: inline edit input fills content area */
+.todo-inline-edit {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-inline-edit .input {
+  width: 100%;
+}
+
+/* Todo item in editing state */
+.todo-item--editing {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+/* Expense: clickable content area */
+.expense-content--editable {
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background-color 0.15s;
+  flex: 1;
+  min-width: 0;
+}
+
+.expense-content--editable:hover,
+.expense-content--editable:focus {
+  background-color: var(--bg-secondary);
+  outline: none;
+}
+
+/* Expense: inline edit expanded layout */
+.expense-item--editing {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.expense-inline-edit {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.expense-inline-edit__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.expense-inline-edit__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+@media (max-width: 480px) {
+  .expense-inline-edit__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   Trip Grid: 4-column on very wide screens
+   ============================================ */
+
+@media (min-width: 1280px) {
+  .trips-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ============================================
+   Todo inline edit: title + description + actions
+   ============================================ */
+
+.todo-title-input,
+.todo-desc-input {
+  font-size: max(16px, 1rem) !important; /* iOS: prevent zoom */
+  width: 100%;
+  display: block;
+}
+
+.todo-desc-input {
+  margin-top: var(--space-2);
+  resize: vertical;
+}
+
+.todo-inline-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  justify-content: flex-end;
+}
+
+/* ============================================
+   Success icon button variant
+   ============================================ */
+
+.btn-icon--success {
+  color: var(--color-success, #16a34a);
+}
+
+.btn-icon--success:hover {
+  color: var(--color-success, #16a34a);
+  background-color: rgba(22, 163, 74, 0.1);
+}
+
+/* ============================================
+   Expense inline edit: compact action row
+   ============================================ */
+
+.expense-inline-edit__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+/* ============================================
+   Header save status indicator
+   ============================================ */
+
+.header__save-status {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+.header__save-status--saving {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.header__save-status--error {
+  color: var(--color-danger, #dc2626);
+}
+
+/* Inline text-link button inside save status error state */
+.header__save-status-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font-size: inherit;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.header__save-status-link:hover {
+  opacity: 0.75;
+}
+
+/* ============================================
+   Backup reminder strip + hint panel
+   ============================================ */
+
+.backup-reminder {
+  padding: var(--space-2) 0 var(--space-3);
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-3);
+}
+
+.backup-reminder__text {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Inline text-link toggle button inside reminder strip */
+.backup-reminder__toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-primary, #2563eb);
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
+.backup-reminder__toggle:hover {
+  opacity: 0.75;
+}
+
+.backup-hint-panel {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  max-width: 560px;
+}
+
+.backup-hint-panel__title {
+  display: block;
+  font-size: 14px;
+  margin-bottom: var(--space-2);
+  color: var(--heading);
+}
+
+.backup-hint-panel__body {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.backup-hint-panel__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ── Tab Bar ─────────────────────────────────────────────────────────────── */
+
+.tab-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.tab-bar__inner {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tab-bar__inner::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-bar__tab {
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
+.tab-bar__tab:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.tab-bar__tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.tab-bar__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ── Calendar Toolbar (mode toggle + month nav) ───────────────────────────── */
+
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0 var(--space-4);
+  flex-wrap: wrap;
+}
+
+.calendar-toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.calendar-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.calendar-mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.calendar-mode-toggle__btn {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: var(--surface);
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  min-height: 32px;
+}
+
+.calendar-mode-toggle__btn + .calendar-mode-toggle__btn {
+  border-left: 1px solid var(--border);
+}
+
+.calendar-mode-toggle__btn--active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* Calendar view panel crossfade — 120ms fade-in when Month↔Quarter toggles */
+@keyframes calendarPanelFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.calendar-view-panel {
+  animation: calendarPanelFadeIn 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calendar-view-panel { animation: none; }
+}
+
+.calendar-month-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.calendar-month-nav__btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.calendar-month-nav__btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.calendar-month-nav__label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 160px;
+  text-align: center;
+}
+
+/* Jump-to-Today button (inside month nav) */
+.calendar-today-btn {
+  margin-left: var(--space-1);
+}
+
+/* Span indicator: ← and → when a trip extends outside the visible month */
+.calendar-trip__span-indicator {
+  color: var(--text-secondary);
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* "View all →" button in undated section header */
+.calendar-nodate-viewall {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ── Budget Placeholder ───────────────────────────────────────────────────── */
+
+.budget-placeholder {
+  padding: var(--space-8) 0;
+}
+
+/* ============================================
+   Component: Trip Detail Overlay (Notebook Mode)
+   ============================================ */
+
+/* Prevent background scroll when overlay is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Full-screen semi-transparent backdrop — shifted right of sidebar on desktop */
+.overlay-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: var(--sidebar-width, 260px); /* sidebar stays visible on desktop */
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+/* Full-screen panel (sits on top of backdrop) */
+.overlay-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: var(--sidebar-width, 260px); /* sidebar stays visible on desktop */
+  z-index: 201;
+  background: var(--overlay-panel-bg, var(--surface));
+  display: flex;
+  flex-direction: column;
+  /* iOS safe area */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* On mobile, overlay goes full-screen (sidebar is hidden) */
+@media (max-width: 980px) {
+  .overlay-backdrop,
+  .overlay-panel {
+    left: 0;
+  }
+}
+
+/* Sticky header row inside the overlay */
+.overlay-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--overlay-panel-bg, var(--surface));
+  /* Lighter separator: shadow instead of hard border */
+  box-shadow: 0 1px 0 var(--overlay-border, var(--border));
+  flex-shrink: 0;
+  min-height: 56px;
+}
+
+.overlay-header__back {
+  flex-shrink: 0;
+}
+
+.overlay-header__title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow: hidden;
+}
+
+.overlay-header__trip-name {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+.overlay-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* Scrollable content area */
+.overlay-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+  padding: 0; /* Padding is now on overlay-content-inner */
+}
+
+/* Export dropdown positioned left (prevents clipping near right edge) */
+.dropdown-menu--left {
+  right: 0;
+  left: auto;
+}
+
+/* Dark mode overlay */
+[data-theme="dark"] .overlay-panel {
+  background: var(--overlay-panel-bg);
+}
+
+[data-theme="dark"] .overlay-header {
+  background: var(--overlay-panel-bg);
+}
+
+/* Mobile: tighter header on small screens */
+@media (max-width: 640px) {
+  .overlay-header {
+    padding: var(--space-2) var(--space-4);
+    gap: var(--space-3);
+    min-height: 52px;
+  }
+
+  .overlay-header__trip-name {
+    font-size: 1.0625rem;
+  }
+
+  /* Stack export+actions if very narrow */
+  .overlay-header__actions {
+    gap: var(--space-1);
+  }
+}
+
+/* ============================================
+   Step 12: UI Polish — Stats Strip, Gear Menu,
+   Toolbar, Calendar Filters, Journey Grouping
+   ============================================ */
+
+/* ── Stats Strip (replaces 4 stat cards) ──────────────────────────────────── */
+
+.stats-strip {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.stats-strip__inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.stats-strip__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.stats-strip__label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stats-strip__value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--heading);
+}
+
+.stats-strip__sep {
+  color: var(--border-hover);
+  user-select: none;
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 480px) {
+  .stats-strip__inner {
+    gap: var(--space-1) var(--space-2);
+  }
+  .stats-strip__label {
+    display: none; /* Values only on very small screens */
+  }
+}
+
+/* ── Header: compact + save status ────────────────────────────────────────── */
+
+.header {
+  padding: var(--space-2) var(--space-6);
+}
+
+.header__title {
+  font-size: var(--font-size-xl);
+}
+
+.header__save-status {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── Settings/Gear Menu ────────────────────────────────────────────────────── */
+
+.settings-menu-container {
+  position: relative;
+}
+
+.settings-menu {
+  min-width: 220px;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  left: auto;
+}
+
+.settings-menu__section-label {
+  padding: var(--space-2) var(--space-4) var(--space-1);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.settings-menu__divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-1) 0;
+}
+
+/* ── Toolbar: search inline with controls ─────────────────────────────────── */
+
+.toolbar__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+/* Remove old border-top/margin-top override since content row is gone */
+.toolbar__filters {
+  border-top: none;
+  margin-top: 0;
+}
+
+.toolbar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.toolbar__search {
+  flex: none;
+}
+
+.toolbar__search-input {
+  max-width: 280px;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .toolbar__controls {
+    margin-left: 0;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .toolbar__search-input {
+    max-width: 100%;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* ── Input sm variant ─────────────────────────────────────────────────────── */
+
+.input--sm {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+/* ── Dropdown: right-aligned ──────────────────────────────────────────────── */
+
+.dropdown-menu--right {
+  right: 0;
+  left: auto;
+}
+
+/* ── Calendar Filter Bar ──────────────────────────────────────────────────── */
+
+.calendar-filter-bar {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-4);
+}
+
+.calendar-filter-bar .filter-chips {
+  flex-wrap: wrap;
+}
+
+/* ── Journey Group Header ─────────────────────────────────────────────────── */
+
+.journey-group-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-3) 0 var(--space-2);
+  margin-top: var(--space-2);
+  border-bottom: 2px solid var(--border);
+  grid-column: 1 / -1; /* Span all grid columns */
+}
+
+.journey-group-header__label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--heading);
+}
+
+.journey-group-header__count {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* ── Journey Pill on Trip Cards ───────────────────────────────────────────── */
+
+.trip-card__journey {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.08);
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-bottom: var(--space-2);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+[data-theme="dark"] .trip-card__journey {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+/* ── Trip Detail: Journey field hint label ────────────────────────────────── */
+
+.form-label__hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-normal);
+  margin-left: var(--space-1);
+}
+
+/* ── Unified card hover: list + calendar ──────────────────────────────────── */
+
+@media (hover: hover) {
+  .trip-card:hover,
+  .calendar-trip:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* ── Reduce stat-card styles (kept for any legacy references) ─────────────── */
+
+.stats { display: none; } /* Hidden — replaced by stats-strip */
+
+/* ============================================
+   Step 13: Overlay Notebook Polish
+   ============================================ */
+
+/* ── Overlay Save Status (beneath sticky header) ─────────────────────────── */
+
+/* Save status: zero height when empty, expands with content */
+.overlay-save-status {
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--overlay-panel-bg, var(--surface));
+}
+
+.overlay-save-status__text {
+  display: block;
+  padding: 3px var(--space-5);
+  border-bottom: 1px solid var(--overlay-border, var(--border));
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.overlay-save-status__text--saved {
+  color: var(--color-success);
+}
+
+.overlay-save-status__text--saving {
+  color: var(--text-muted);
+}
+
+.overlay-save-status__text--error {
+  color: var(--color-error);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ── Overlay Summary Strip (destination / dates / journey) ───────────────── */
+
+.overlay-summary-strip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2) var(--space-5);
+  background: var(--overlay-panel-bg, var(--bg));
+  border-bottom: 1px solid var(--overlay-border, var(--border));
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.overlay-summary-strip__item {
+  color: var(--text);
+}
+
+.overlay-summary-strip__item--journey {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.overlay-summary-strip__sep {
+  color: var(--border-hover);
+  user-select: none;
+}
+
+/* ── Overlay Content Inner (max-width centering) ─────────────────────────── */
+
+.overlay-content-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-10);
+  display: flex;
+  flex-direction: column;
+  gap: 26px; /* 24–28px intentional section spacing */
+}
+
+@media (max-width: 640px) {
+  .overlay-content-inner {
+    padding: var(--space-4) var(--space-3) var(--space-8);
+    gap: var(--space-4);
+  }
+}
+
+/* ── Section Card (wraps each detail-section) ────────────────────────────── */
+
+/* Reset detail-section base padding/margin when section-card is applied
+   (section-card re-defines layout via its own child selectors) */
+.section-card.detail-section {
+  padding: 0;
+  margin-bottom: 0;
+  /* Allow hover lift; cancel the base detail-section's catch-all transition */
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.section-card .detail-section__header {
+  /* Override base margin-bottom since we use border-bottom instead */
+  margin-bottom: 0;
+}
+
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--overlay-border, var(--border));
+  border-radius: var(--overlay-radius, var(--radius-lg));
+  box-shadow: var(--overlay-shadow-card);
+  overflow: hidden;
+}
+
+.section-card .detail-section__header {
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--overlay-border, var(--border));
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  min-height: 48px;
+}
+
+.section-card .detail-section__title {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--heading);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  user-select: none;
+}
+
+.section-card .detail-section__content {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+@media (max-width: 640px) {
+  .section-card .detail-section__header {
+    padding: var(--space-2) var(--space-4);
+    min-height: 44px;
+  }
+  .section-card .detail-section__content {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+}
+
+/* ── Trip field display: field-like appearance ────────────────────────────── */
+
+/* Reinforce the field look so it reads as a tappable form cell */
+.section-card .trip-field-display {
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg);
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  transition: border-color var(--transition-fast), background var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.section-card .trip-field-display:hover,
+.section-card .trip-field-display:focus {
+  border-color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.02);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.06);
+  outline: none;
+}
+
+.section-card .trip-field-display--multiline {
+  align-items: flex-start;
+  min-height: 72px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Edit hint (one-time session hint under Details title) ───────────────── */
+
+.subtle-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+/* ── Inline Add Row (tasks / expenses) ───────────────────────────────────── */
+
+.inline-add-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: none;
+  border: 1px solid var(--overlay-border, var(--border));
+  border-radius: var(--overlay-radius, var(--radius-lg));
+  background: var(--bg);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.inline-add-row__input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Expense add row: tighter amount field */
+.inline-add-row--expense .inline-add-row__amount {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .inline-add-row--expense .inline-add-row__amount {
+    width: 80px;
+  }
+}
+
+/* Compact inline error below add row */
+.inline-error--compact {
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  padding: var(--space-1) 0;
+  margin: 0;
+}
+
+/* ── Todo list: tighter, cleaner rows ────────────────────────────────────── */
+
+/* Ensure completed tasks de-emphasize visually */
+.todo-content--completed .todo-title {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.todo-content--completed .todo-description {
+  opacity: 0.4;
+}
+
+/* Ensure inline-error shows under date inputs cleanly */
+.detail-section__content .inline-error {
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  margin-top: var(--space-1);
+  line-height: 1.4;
+}
+
+/* ── Notebook Textarea (Notes section) ───────────────────────────────────── */
+
+.textarea--notebook {
+  width: 100%;
+  min-height: 200px;
+  font-size: 1rem; /* Explicit 1rem — prevents iOS zoom (must be ≥16px) */
+  line-height: 1.7;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  resize: vertical;
+  padding: 0;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.textarea--notebook:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.textarea--notebook::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ── Dark mode adjustments ───────────────────────────────────────────────── */
+
+[data-theme="dark"] .section-card {
+  background: var(--surface);
+  border-color: var(--overlay-border);
+}
+
+[data-theme="dark"] .section-card .trip-field-display {
+  background: var(--bg);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+[data-theme="dark"] .section-card .trip-field-display:hover,
+[data-theme="dark"] .section-card .trip-field-display:focus {
+  border-color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.10);
+}
+
+[data-theme="dark"] .overlay-save-status {
+  background: var(--overlay-panel-bg);
+}
+
+[data-theme="dark"] .overlay-summary-strip {
+  background: var(--overlay-panel-bg);
+}
+
+/* ============================================
+   App Shell — Sidebar Layout (Step 14)
+   ============================================ */
+
+/* ── Shell grid ──────────────────────────────────────────────────────────── */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: var(--space-4) 0;
+  flex-shrink: 0;
+  /* Smooth scroll on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Sidebar brand ───────────────────────────────────────────────────────── */
+
+.sidebar__brand {
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-4);
+}
+
+.sidebar__brand-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.sidebar__logo {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--heading);
+  line-height: 1.2;
+}
+
+.sidebar__version {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+.sidebar__status {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  min-height: 18px;
+}
+
+.sidebar__status--saving {
+  color: var(--text-muted);
+}
+
+.sidebar__status--error {
+  color: var(--color-error);
+  font-weight: var(--font-weight-semibold);
+}
+
+.sidebar__status--error button {
+  background: none;
+  border: none;
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.sidebar__status--error button:hover {
+  opacity: 0.75;
+}
+
+/* ── Sidebar primary nav ─────────────────────────────────────────────────── */
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.sidebar__nav-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  /* Minimum 44px touch target */
+  min-height: 44px;
+}
+
+.sidebar__nav-btn:hover {
+  background: var(--surface-hover);
+  color: var(--heading);
+}
+
+.sidebar__nav-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.sidebar__nav-btn--active {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--color-primary);
+}
+
+[data-theme="dark"] .sidebar__nav-btn--active {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--color-primary);
+}
+
+.sidebar__nav-btn svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar__nav-btn--active svg {
+  opacity: 1;
+}
+
+.sidebar__nav-btn:hover svg {
+  opacity: 0.85;
+}
+
+/* ── Sidebar actions section ─────────────────────────────────────────────── */
+
+.sidebar__section-title {
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  margin-bottom: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.sidebar__action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  font-family: var(--font-family);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  min-height: 40px;
+}
+
+.sidebar__action-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.sidebar__action-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.sidebar__action-btn svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.sidebar__action-btn:hover svg {
+  opacity: 1;
+}
+
+/* ── Sidebar footer (theme toggle) ───────────────────────────────────────── */
+
+.sidebar__footer {
+  margin-top: auto;
+  padding: var(--space-4) var(--space-3) 0;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar__theme-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  min-height: 40px;
+}
+
+.sidebar__theme-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.sidebar__theme-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.sidebar__theme-btn svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.sidebar__theme-label {
+  font-size: var(--font-size-sm);
+}
+
+/* ── Main area ───────────────────────────────────────────────────────────── */
+
+.main-area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ── Mobile tab bar (hidden on desktop) ─────────────────────────────────── */
+
+.mobile-tabs {
+  display: none; /* hidden on desktop; shown at ≤980px breakpoint */
+  align-items: center;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  /* Safe-area support */
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.mobile-tabs__nav {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-tabs__nav::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-tabs__tab {
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  min-height: 48px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-tabs__tab:hover {
+  color: var(--text);
+}
+
+.mobile-tabs__tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.mobile-tabs__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.mobile-tabs__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  flex-shrink: 0;
+}
+
+.mobile-tabs__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.mobile-tabs__icon-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.mobile-tabs__icon-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Main topbar ─────────────────────────────────────────────────────────── */
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.main__topbar {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 60px;
+  flex-shrink: 0;
+}
+
+/* Journey detail mode: title truncates, Back/Delete flex-shrink */
+.main__title--journey {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--heading);
+}
+.main__topbar-back,
+.main__topbar-delete {
+  flex-shrink: 0;
+}
+
+.main__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--heading);
+  line-height: 1.2;
+}
+
+/* ── Main content ────────────────────────────────────────────────────────── */
+
+.main__content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-6);
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* ── Responsive breakpoint: ≤980px sidebar hidden, mobile tabs shown ─────── */
+
+@media (max-width: 980px) {
+  .app-shell {
+    display: block; /* single column on mobile */
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .mobile-tabs {
+    display: flex;
+  }
+
+  .main__topbar {
+    display: none; /* page title shown in mobile-tabs tab labels */
+  }
+
+  .main__content {
+    padding: var(--space-4);
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .mobile-tabs__tab {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .main__content {
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+/* ── Dark mode sidebar adjustments ──────────────────────────────────────────*/
+
+[data-theme="dark"] .sidebar {
+  background: var(--surface);
+  border-right-color: var(--border);
+}
+
+[data-theme="dark"] .sidebar__nav-btn--active {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+[data-theme="dark"] .mobile-tabs {
+  background: var(--surface);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .main__topbar {
+  background: var(--bg);
+  border-bottom-color: var(--border);
+}
+
+/* ============================================
+   List View Redesign — Step 15
+   Stats Row, Controls Panel, Topbar Actions
+   ============================================ */
+
+/* ── Fix main__content padding ───────────────────────────────────────────── */
+
+.main__content {
+  padding: 20px 24px;
+  max-width: none;
+}
+
+/* ── Sidebar app icon ────────────────────────────────────────────────────── */
+
+.sidebar__icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: var(--color-primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* ── Main topbar actions ─────────────────────────────────────────────────── */
+
+.main__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.main__topbar-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.main__topbar-icon-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+.main__topbar-icon-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Stats Row — 4-card grid ─────────────────────────────────────────────── */
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.stats-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stats-card__label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.stats-card__value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--heading);
+  line-height: 1;
+}
+
+.stats-card__hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+  font-style: italic;
+}
+
+@media (max-width: 720px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Controls Panel ──────────────────────────────────────────────────────── */
+
+.controls-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Search row */
+.controls-panel__search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.controls-panel__search-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.controls-panel__search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.controls-panel__search-input {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  height: 38px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.controls-panel__search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.controls-panel__search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.controls-panel__search-right {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Chips row */
+.controls-panel__chips-row .filter-chips {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Quick-add row */
+.controls-panel__quickadd-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.controls-panel__quickadd-plus {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+  line-height: 1;
+  user-select: none;
+}
+
+.controls-panel__quickadd-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-family);
+  /* 1rem prevents iOS auto-zoom on focus */
+  font-size: 1rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.controls-panel__quickadd-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.controls-panel__quickadd-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Responsive: stack search right-controls on narrow screens */
+@media (max-width: 600px) {
+  .controls-panel__search-row {
+    flex-wrap: wrap;
+  }
+
+  .controls-panel__search-right {
+    width: 100%;
+  }
+
+  .controls-panel__search-right .sort-control {
+    flex: 1;
+  }
+
+  .controls-panel__search-right .sort-control select {
+    width: 100%;
+  }
+}
+
+/* ── Empty state — inline variant ────────────────────────────────────────── */
+
+.empty-state--inline {
+  text-align: left;
+  padding: 20px 4px;
+}
+
+.empty-state--inline .empty-state__message {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* ── Trip grid gap tighten for sidebar layout ───────────────────────────── */
+
+.trips-grid {
+  gap: var(--space-3);
+  align-items: start;
+}
+
+/* ── Dark mode ───────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] .controls-panel {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .controls-panel__search-input,
+[data-theme="dark"] .controls-panel__quickadd-input {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .stats-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .main__topbar-icon-btn {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .main__topbar-icon-btn:hover {
+  background: var(--surface-hover);
+}
+
+/* ============================================
+   Step 16: Structure & Card Unification
+   ============================================ */
+
+/* ── Sidebar: primary action button ──────────────────────────────────────── */
+
+.sidebar__action-btn--primary {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.sidebar__action-btn--open {
+  background: var(--surface-hover);
+  color: var(--color-primary);
+}
+
+/* ── Sidebar: inline search ──────────────────────────────────────────────── */
+
+.sidebar__search-inline {
+  padding: 0 var(--space-2) var(--space-2);
+}
+
+.sidebar__search-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.sidebar__search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+[data-theme="dark"] .sidebar__search-input {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* ── Sidebar: backup reminder ────────────────────────────────────────────── */
+
+.sidebar__backup-reminder {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+.sidebar__backup-text {
+  line-height: 1.5;
+}
+
+.sidebar__backup-toggle {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
+  padding: 0;
+}
+
+.sidebar__backup-panel {
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.sidebar__backup-body {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-2);
+}
+
+.sidebar__backup-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ── Controls panel: chips row with sort ─────────────────────────────────── */
+
+.controls-panel__chips-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.controls-panel__chips-row .sort-control {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ── Calendar month grid (replaces calendar-month-list) ──────────────────── */
+
+.calendar-month-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  padding-bottom: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 640px) {
+  .calendar-month-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 980px) {
+  .calendar-month-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .calendar-month-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ── No-date label for unified cards ─────────────────────────────────────── */
+
+.calendar-trip__no-date {
+  font-style: italic;
+  opacity: 0.6;
+}
+
+/* ── Calendar filter bar spacing ─────────────────────────────────────────── */
+
+.calendar-filter-bar {
+  margin-bottom: var(--space-4);
+}
+
+/* ── Step 19: Progressive reveal toggle ──────────────────────────────────── */
+
+.create-more-toggle {
+  padding: var(--space-3) 0;
+}
+
+.create-more-toggle__btn {
+  width: 100%;
+  text-align: center;
+  color: var(--text-secondary);
+  border-style: dashed;
+}
+
+/* ── Step 19: Section optional label ─────────────────────────────────────── */
+
+.section-optional {
+  font-weight: 400;
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* ── Step 19: Date picker icon ───────────────────────────────────────────── */
+
+.trip-field-display {
+  position: relative;
+}
+
+/* ── Date field display with icon button ──────────────────────────────────── */
+
+.trip-field-display--with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.trip-field-display__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.icon-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.icon-btn:active {
+  transform: translateY(1px);
+}
+
+/* ── Step 19: Task inline note button ────────────────────────────────────── */
+
+.todo-add-note-btn {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.todo-item:hover .todo-add-note-btn,
+.todo-content:focus .todo-add-note-btn {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .todo-add-note-btn {
+    opacity: 0.6;
+  }
+}
+
+/* ── Step 19: Expense quick-add category input ───────────────────────────── */
+
+.inline-add-row--expense {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.inline-add-row__category {
+  min-width: 90px;
+  max-width: 140px;
+  flex: 0 1 auto;
+}
+
+/* ── Step 19d: Empty hint in header + compact cards ──────────────────────── */
+
+.detail-section__empty-hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  opacity: 0.55;
+  pointer-events: none;
+  white-space: nowrap;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.section-card--compact .detail-section__content {
+  padding-bottom: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .section-card--compact .detail-section__content {
+    padding-bottom: var(--space-2);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   STEP 20 — Premium Overlay Polish
+   All rules scoped to overlay context; sidebar + list/calendar untouched.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Overlay entrance animation ──────────────────────────────────────────── */
+
+@keyframes overlay-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .overlay-panel {
+    animation: overlay-panel-in 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+}
+
+/* ── Form labels inside overlay — small-caps subtle style ───────────────── */
+
+.overlay-content-inner .form-label {
+  font-size: 0.6875rem; /* 11px */
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.065em;
+  color: var(--overlay-label-color, var(--text-muted));
+  margin-bottom: var(--space-1);
+}
+
+/* Preserve normal label style for inline-edit sub-labels inside section cards */
+.overlay-content-inner .expense-inline-edit .form-label,
+.overlay-content-inner .todo-inline-edit .form-label {
+  font-size: var(--font-size-xs);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+/* form-label__hint: don't inherit uppercase from parent label */
+.overlay-content-inner .form-label .form-label__hint {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--font-size-xs);
+}
+
+/* ── Tap-to-edit: explicit cursor + hover highlight ─────────────────────── */
+
+.overlay-content-inner .trip-field-display {
+  cursor: pointer;
+}
+
+/* Placeholder text: lighter and more clearly guidance-like */
+.overlay-content-inner .trip-field-display--placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* ── Input / textarea / select focus glow inside overlay ────────────────── */
+
+.overlay-content-inner .input:focus,
+.overlay-content-inner .textarea:focus,
+.overlay-content-inner .select:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--overlay-field-glow);
+  outline: none;
+}
+
+/* Active trip field input: clear "editing" ring */
+.overlay-content-inner .trip-field-input-active:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--overlay-field-glow);
+  outline: none;
+}
+
+/* ── Quick-add row inputs: transparent in unified row ───────────────────── */
+
+.section-card .inline-add-row .input {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.section-card .inline-add-row .input:focus {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+  /* Underline-only focus cue inside the unified row */
+  border-bottom-color: var(--color-primary);
+}
+
+/* ── Notes textarea: slightly more breathing room ───────────────────────── */
+
+.section-card .textarea--notebook {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+/* ── Button active press micro-interaction ──────────────────────────────── */
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+  opacity: 0.88;
+}
+
+/* ── Section title: user-select none + explicit pointer ─────────────────── */
+
+.section-card [role="button"] {
+  cursor: pointer;
+}
+
+/* ── Fold transition: section expand / collapse ─────────────────────────── */
+
+.fold-enter-active {
+  transition: opacity var(--transition-base);
+}
+
+.fold-leave-active {
+  transition: opacity var(--transition-fast);
+}
+
+.fold-enter-from,
+.fold-leave-to {
+  opacity: 0;
+}
+
+/* ── Overlay summary strip: match panel bg on dark ──────────────────────── */
+
+[data-theme="dark"] .overlay-summary-strip {
+  background: var(--overlay-panel-bg);
+}
+
+/* ── Inline add row dark mode ────────────────────────────────────────────── */
+
+[data-theme="dark"] .inline-add-row {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--overlay-border);
+}
+
+/* ── Reduced motion: disable all overlay animations ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay-panel {
+    animation: none;
+  }
+  .fold-enter-active,
+  .fold-leave-active {
+    transition: none;
+  }
+  .btn:active {
+    transform: none;
+    opacity: 1;
+  }
+  .icon-btn:active {
+    transform: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   STEP 21 — Notebook Hierarchy: Details Primary, Secondary Cards, Hover Lift
+   Overlay only. No sidebar, calendar, or list changes.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Section card hover lift (all cards) ────────────────────────────────── */
+
+/* Hover lift only on pointer devices (not touch) */
+@media (hover: hover) {
+  .section-card:not(.section-card--primary):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.09);
+  }
+}
+
+/* ── Details card: PRIMARY — bright, borderless, generous ───────────────── */
+
+.section-card--primary {
+  border: none;
+  border-radius: var(--overlay-radius-primary);
+  box-shadow: var(--overlay-shadow-primary);
+  /* Slightly elevated by using white surface against a tinted panel bg */
+  background: #ffffff;
+}
+
+.section-card--primary .detail-section__header {
+  padding: var(--space-4) var(--space-6);
+  /* Softer divider under Details header */
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+  min-height: 56px;
+}
+
+.section-card--primary .detail-section__content {
+  padding: var(--space-5) var(--space-6) var(--space-6);
+}
+
+.section-card--primary .detail-section__title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Field displays inside primary card: slightly more spacious */
+.section-card--primary .trip-field-display {
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+}
+
+/* Hover lift disabled for primary (it's already elevated) */
+@media (hover: hover) {
+  .section-card--primary:hover {
+    transform: none;
+    box-shadow: var(--overlay-shadow-primary);
+  }
+}
+
+/* ── Secondary cards: Tasks / Expenses / Notes ──────────────────────────── */
+
+/* Slightly tinted background creates visual hierarchy vs primary */
+.section-card:not(.section-card--primary) {
+  background: var(--bg);
+}
+
+/* Smaller header for secondary section cards */
+.section-card:not(.section-card--primary) .detail-section__header {
+  padding: var(--space-2) var(--space-5);
+  min-height: 44px;
+}
+
+/* Secondary section titles: slightly smaller, caret pushed to far right */
+.section-card:not(.section-card--primary) .detail-section__title {
+  font-size: 0.9375rem;
+  justify-content: space-between;
+}
+
+/* Secondary section content: 16px internal spacing */
+.section-card:not(.section-card--primary) .detail-section__content {
+  padding: var(--space-4);
+}
+
+/* ── Quick-add row: embedded, borderless — no heavy box ────────────────── */
+
+/* Remove the container-border look from Step 20; make it flush with card */
+.section-card:not(.section-card--primary) .inline-add-row {
+  border: none;
+  border-bottom: 1px solid var(--overlay-border, var(--border));
+  border-radius: 0;
+  background: transparent;
+  padding: var(--space-1) 0 var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* Inputs inside borderless add-row: transparent, just the text */
+.section-card:not(.section-card--primary) .inline-add-row .input {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  padding: var(--space-2) var(--space-2);
+}
+
+.section-card:not(.section-card--primary) .inline-add-row .input:focus {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+  border-bottom: 1.5px solid var(--color-primary);
+}
+
+/* Add button: slightly smaller / softer */
+.section-card:not(.section-card--primary) .inline-add-row .btn--sm {
+  padding: 6px 14px;
+  font-size: var(--font-size-xs);
+  min-height: 32px;
+  opacity: 0.85;
+}
+
+.section-card:not(.section-card--primary) .inline-add-row .btn--sm:hover {
+  opacity: 1;
+}
+
+/* ── Trip-form vertical rhythm inside primary card ──────────────────────── */
+
+/* Consistent 16px gap between fields in Details */
+.section-card--primary .trip-form {
+  gap: var(--space-4);
+}
+
+/* 8px gap: label → input */
+.section-card--primary .trip-form__field {
+  gap: var(--space-2);
+}
+
+/* ── Dark mode overrides ─────────────────────────────────────────────────── */
+
+[data-theme="dark"] .section-card--primary {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .section-card--primary .detail-section__header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .section-card:not(.section-card--primary) {
+  /* In dark mode bg ≈ surface; use slightly different tint */
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Reduced motion: no hover lift ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .section-card:not(.section-card--primary):hover {
+    transform: none;
+    box-shadow: var(--overlay-shadow-card);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   STEP 22 — "Styled → Designed": Depth, Structural Fields, Unified Cards
+   All rules scoped to overlay context. No sidebar, calendar, or list changes.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1a. Three-tone depth: Apply secondary card mid-tone bg ─────────────── */
+
+/* Override Step 21's var(--bg) for secondary cards with the new mid-tone */
+.section-card:not(.section-card--primary) {
+  background: var(--overlay-secondary-card-bg, var(--bg));
+}
+
+/* Dark mode: primary card distinctly lighter than panel */
+[data-theme="dark"] .section-card--primary {
+  background: hsl(215, 28%, 21%); /* lightest of the three tones */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Dark mode secondary cards: already set via token, confirm border */
+[data-theme="dark"] .section-card:not(.section-card--primary) {
+  background: var(--overlay-secondary-card-bg);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ── 2. "Details" label — eyebrow, not section heading ─────────────────── */
+
+/* Override Step 21's large/bold primary title.
+   Make it a quiet, small-caps eyebrow above the form fields. */
+.section-card--primary .detail-section__title {
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+  opacity: 0.45;
+}
+
+/* Primary card header: tighter (label is tiny now) */
+.section-card--primary .detail-section__header {
+  min-height: 36px;
+  padding: var(--space-3) var(--space-6) var(--space-2);
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .section-card--primary .detail-section__header {
+  border-bottom-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ── 3. Fields structural: rounder, softer border, edit shadow ──────────── */
+
+/* Rounder corners on field display cells */
+.section-card .trip-field-display {
+  border-radius: 8px;
+  border-color: rgba(0, 0, 0, 0.07); /* softer border */
+  font-size: var(--font-size-base);   /* value text stays readable */
+  min-height: 44px;
+}
+
+/* Hover: minimal tint — just enough to show it's interactive */
+.section-card .trip-field-display:hover,
+.section-card .trip-field-display:focus {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: rgba(37, 99, 235, 0.012);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+  outline: none;
+}
+
+/* Dark mode field display borders */
+[data-theme="dark"] .section-card .trip-field-display {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .section-card .trip-field-display:hover,
+[data-theme="dark"] .section-card .trip-field-display:focus {
+  border-color: rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.07);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.10);
+}
+
+/* Editing state: bright border + inset inner shadow (structural feel) */
+.overlay-content-inner .trip-field-input-active,
+.overlay-content-inner textarea.trip-field-input-active {
+  border-color: var(--color-primary);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06), var(--overlay-field-glow);
+  border-radius: 8px;
+}
+
+/* Rounder radius on all inputs inside overlay */
+.overlay-content-inner .input {
+  border-radius: 8px;
+}
+
+/* ── 4. Quick-add rows: lower profile, dissolve into card ───────────────── */
+
+/* Tighter vertical rhythm — less padding above/below */
+.section-card:not(.section-card--primary) .inline-add-row {
+  padding: var(--space-1) 0 var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Add button: quiet, small, low opacity — not a call to action */
+.section-card:not(.section-card--primary) .inline-add-row .btn--sm {
+  padding: 4px 12px;
+  font-size: 0.73rem;
+  min-height: 28px;
+  opacity: 0.65;
+  font-weight: var(--font-weight-normal);
+  letter-spacing: 0;
+}
+
+.section-card:not(.section-card--primary) .inline-add-row .btn--sm:hover {
+  opacity: 0.88;
+}
+
+/* ── 5. Section cards: unified radius, reduced border, compact header ────── */
+
+/* Consistent radius across all secondary cards */
+.section-card:not(.section-card--primary) {
+  border-radius: var(--overlay-radius, 14px);
+  border-color: rgba(0, 0, 0, 0.07);
+}
+
+/* Compact secondary header: 40px tall, tighter padding */
+.section-card:not(.section-card--primary) .detail-section__header {
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
+}
+
+/* Compact secondary content padding */
+.section-card:not(.section-card--primary) .detail-section__content {
+  padding: var(--space-3) var(--space-4);
+}
+
+/* ── 6. Micro-polish ─────────────────────────────────────────────────────── */
+
+/* Overlay title: slightly larger */
+.overlay-header__trip-name {
+  font-size: 1.3125rem;
+}
+
+/* Header divider: even lighter — near-invisible, just a breath */
+.overlay-header {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .overlay-header {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Status pill: vertically centered in header */
+.overlay-header .trip-status-badge,
+.overlay-header .status-badge {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* Caret icons in secondary section headers: smaller, softer */
+.section-card:not(.section-card--primary) .detail-section__title svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* Breathing room between overlay header and content */
+.overlay-content-inner {
+  padding-top: var(--space-2);
+}
+
+/* ── Reduced motion guard ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .section-card .trip-field-display {
+    transition: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   STEP 23 — Color Cohesion: Calmer, Unified, Depth-via-Shadow
+   COLOR AND SHADOW CHANGES ONLY. No layout, spacing, radius, or font changes.
+   Goal: tight tone band across all layers; elevation from border + shadow only.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Primary card (Details): off-white, not pure white ─────────────────── */
+/* Override Step 21's #ffffff background. Now only ~4% lighter than panel.
+   Border ring acts as the visible elevation marker instead of brightness. */
+.section-card--primary {
+  background: #f0f5fb;
+  border: 1px solid rgba(0, 0, 0, 0.11);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(0, 0, 0, 0.07);
+}
+
+/* ── Dark mode primary card: nudge above panel, border does the work ─────── */
+[data-theme="dark"] .section-card--primary {
+  background: hsl(215, 25%, 19%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Dark mode secondary cards: close to panel, not a bright pop ─────────── */
+[data-theme="dark"] .section-card:not(.section-card--primary) {
+  background: var(--overlay-secondary-card-bg); /* hsl(215, 25%, 16%) */
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.30);
+}
+
+/* ── Field display: semi-transparent over card bg, not flat white ─────────── */
+/* Replaces var(--bg) = #f8fafc with a translucent white that blends with
+   the card's own tone, reducing the internal brightness jump. */
+.section-card .trip-field-display {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+[data-theme="dark"] .section-card .trip-field-display {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Hover state: pull back from bright blue, keep it calm */
+.section-card .trip-field-display:hover,
+.section-card .trip-field-display:focus {
+  background: rgba(255, 255, 255, 0.80);
+}
+
+[data-theme="dark"] .section-card .trip-field-display:hover,
+[data-theme="dark"] .section-card .trip-field-display:focus {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   STEP 24 — Dark Mode: Details Card Fill Parity
+   Problem: Details background was hsl(215,25%,19%) — 3% lighter than secondary
+   cards at hsl(215,25%,16%), reading as washed-out/disabled in dark mode.
+   Fix: Match fills exactly. Emphasis via accent border + deeper shadow only.
+   DARK MODE ONLY — light mode untouched.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .section-card--primary {
+  /* Same surface as all other section cards — no brightness differential */
+  background: var(--overlay-secondary-card-bg);
+
+  /* Emphasis: accent border replaces fill as the "primary" signal.
+     All sides: subtle blue-tinted border. Top: 2px stronger accent line. */
+  border: 1px solid rgba(96, 165, 250, 0.20);
+  border-top-color: rgba(96, 165, 250, 0.38);
+  border-top-width: 2px;
+
+  /* Elevation: deeper shadow vs secondary cards (which use 0 1px 4px 0.30) */
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+/* Inner header divider: match the accent border tone */
+[data-theme="dark"] .section-card--primary .detail-section__header {
+  border-bottom-color: rgba(96, 165, 250, 0.10);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   STEP 25 — Cinematic Dimensional Dark SaaS
+   DARK MODE ONLY. Light mode untouched. Overlay only.
+   No layout, spacing, typography, or data-logic changes.
+
+   Elevation System:
+     Level 0 — Page background  (--surface-bg)
+     Level 1 — Overlay surface  (--surface-overlay) + atmosphere gradient
+     Level 2 — Section cards    (--surface-card) + gradient + mid shadow
+     Level 3 — Details card     (--surface-card-primary) + gradient + deep shadow + glow
+
+   Depth comes from: surface gradients, shadow ladder, top-edge highlights,
+   and a single controlled accent glow — NOT from brightness shifts.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Depth System Variables ──────────────────────────────────────────── */
+
+[data-theme="dark"] {
+  /* 4-level surface hierarchy */
+  --surface-bg:           hsl(215, 32%, 9%);
+  --surface-overlay:      hsl(215, 30%, 12%);
+  --surface-card:         hsl(215, 25%, 16%);
+  --surface-card-primary: hsl(215, 25%, 16%); /* same fill as cards — no brightness gap */
+
+  /* Alias existing tokens to new depth system */
+  --overlay-panel-bg:          var(--surface-overlay);
+  --overlay-secondary-card-bg: var(--surface-card);
+
+  /* Shadow elevation ladder */
+  --shadow-elevation-1: 0 8px 32px rgba(0,0,0,0.40), 0 2px 8px rgba(0,0,0,0.25);
+  --shadow-elevation-2: 0 4px 16px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.25);
+  --shadow-elevation-3: 0 20px 60px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.35);
+
+  /* Shared inner highlight — makes surfaces feel physical */
+  --highlight-edge: inset 0 1px 0 rgba(255,255,255,0.06);
+
+  /* Accent glow — Details card only */
+  --accent-glow: 0 0 0 1px rgba(96, 165, 250, 0.25);
+
+  /* Softer global overlay border */
+  --overlay-border: rgba(255, 255, 255, 0.06);
+}
+
+/* ── 2. Background Atmosphere ────────────────────────────────────────────── */
+
+/* Subtle radial blue tint behind overlay — barely visible, cinematic depth */
+[data-theme="dark"] .overlay-panel {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(59, 130, 246, 0.04), transparent 65%),
+    var(--surface-overlay);
+}
+
+/* Deeper backdrop for overlay isolation */
+[data-theme="dark"] .overlay-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* ── 3+4+5+6+7. Section Cards — consolidated per-selector ────────────── */
+
+/* All section cards: softer borders — let shadow do the work */
+[data-theme="dark"] .section-card {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Secondary cards (Tasks / Expenses / Notes):
+   gradient top-light + mid shadow + inner highlight */
+[data-theme="dark"] .section-card:not(.section-card--primary) {
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.035), rgba(255,255,255,0.008)),
+    var(--surface-card);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    var(--shadow-elevation-2),
+    var(--highlight-edge);
+}
+
+/* Details card (primary):
+   gradient top-light + deepest shadow + inner highlight + accent glow.
+   Same base fill as secondary — emphasis entirely from shadow + glow. */
+[data-theme="dark"] .section-card--primary {
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.045), rgba(255,255,255,0.01)),
+    var(--surface-card-primary);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    var(--shadow-elevation-3),
+    var(--highlight-edge),
+    var(--accent-glow);
+}
+
+/* Overlay header: cinematic depth separator */
+[data-theme="dark"] .overlay-header {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.30);
+}
+
+/* Inner header dividers: very subtle */
+[data-theme="dark"] .section-card .detail-section__header {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ── 8. Field Polish ─────────────────────────────────────────────────────── */
+
+/* Fields: slightly darker than card surface + inner shadow for depth */
+[data-theme="dark"] .section-card .trip-field-display {
+  background: rgba(0, 0, 0, 0.20);
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* Field hover: glow, not brightness */
+[data-theme="dark"] .section-card .trip-field-display:hover,
+[data-theme="dark"] .section-card .trip-field-display:focus {
+  background: rgba(0, 0, 0, 0.25);
+  border-color: rgba(96, 165, 250, 0.28);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.15),
+    0 0 0 2px rgba(96, 165, 250, 0.10);
+}
+
+/* Active editing state: glow focus ring, not brightness */
+[data-theme="dark"] .overlay-content-inner .trip-field-input-active,
+[data-theme="dark"] .overlay-content-inner textarea.trip-field-input-active {
+  background: rgba(0, 0, 0, 0.25);
+  border-color: rgba(96, 165, 250, 0.40);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.20),
+    0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* All overlay inputs: recessed into card */
+[data-theme="dark"] .overlay-content-inner .input {
+  background: rgba(0, 0, 0, 0.18);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .overlay-content-inner .input:focus {
+  border-color: rgba(96, 165, 250, 0.35);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* ── 9. Transitions ──────────────────────────────────────────────────────── */
+
+[data-theme="dark"] .section-card.detail-section {
+  transition: box-shadow 200ms ease, transform 200ms ease, background 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="dark"] .section-card.detail-section {
+    transition: none;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   STEP 26 — Premium B-Style Dark Mode Punch Pass
+   DARK MODE ONLY. Light mode untouched. Overlay only.
+   No layout, spacing, typography, or data-logic changes.
+
+   Three changes:
+   1. Material grain (noise) via ::before pseudo-elements + CSS gradients
+   2. Wider depth ladder (bg 8% < overlay 12% < cards 18%)
+   3. Specular highlights + stronger elevation shadows + accent ring
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Depth ladder: widen surface separation ──────────────────────────── */
+
+[data-theme="dark"] {
+  /* Deeper page background */
+  --surface-bg:           hsl(215, 32%, 8%);   /* was 9% */
+
+  /* Overlay surface stays put */
+  --surface-overlay:      hsl(215, 28%, 12%);
+
+  /* Cards: bump to 18% for a clear 6% step above overlay */
+  --surface-card:         hsl(215, 22%, 18%);  /* was 16% */
+  --surface-card-primary: hsl(215, 22%, 18%);  /* SAME fill — no brightness gap */
+
+  /* Re-alias old tokens to new values */
+  --overlay-panel-bg:          var(--surface-overlay);
+  --overlay-secondary-card-bg: var(--surface-card);
+
+  /* Stronger inner highlight for more physical surfaces */
+  --highlight-edge: inset 0 1px 0 rgba(255,255,255,0.09);  /* was 0.06 */
+
+  /* Tighter accent glow for Details */
+  --accent-glow: 0 0 0 1px rgba(96, 165, 250, 0.30);  /* was 0.25 */
+
+  /* Beefier shadow ladder */
+  --shadow-elevation-2: 0 4px 20px rgba(0,0,0,0.40), 0 1px 6px rgba(0,0,0,0.30);
+  --shadow-elevation-3: 0 16px 48px rgba(0,0,0,0.50), 0 4px 12px rgba(0,0,0,0.35);
+}
+
+/* ── 2. Material grain — CSS-only noise via layered gradients ───────────── */
+
+/* Positioning context for card grain pseudo-elements */
+[data-theme="dark"] .section-card {
+  position: relative;
+}
+
+/* Grain texture: 3 repeating-linear-gradients at different angles/intervals.
+   Combined repeat = LCM(3,5,7) = 105px — large enough to avoid visible tiling.
+   mix-blend-mode: soft-light at ~3.5% opacity is barely perceptible but
+   visibly breaks up flat areas when compared side-by-side. */
+[data-theme="dark"] .section-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  opacity: 0.035;
+  background:
+    repeating-linear-gradient(0deg, #fff 0, transparent 1px, transparent 3px),
+    repeating-linear-gradient(90deg, #fff 0, transparent 1px, transparent 5px),
+    repeating-linear-gradient(127deg, rgba(0,0,0,0.7) 0, transparent 1px, transparent 7px);
+}
+
+/* Panel grain: even subtler than cards (lower opacity, same technique) */
+[data-theme="dark"] .overlay-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  opacity: 0.025;
+  background:
+    repeating-linear-gradient(0deg, #fff 0, transparent 1px, transparent 3px),
+    repeating-linear-gradient(90deg, #fff 0, transparent 1px, transparent 5px),
+    repeating-linear-gradient(127deg, rgba(0,0,0,0.7) 0, transparent 1px, transparent 7px);
+}
+
+/* ── 3. Specular highlights + stronger elevation shadows ────────────────── */
+
+/* Overlay panel: atmosphere gradient with slightly stronger blue tint */
+[data-theme="dark"] .overlay-panel {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(59, 130, 246, 0.05), transparent 65%),
+    var(--surface-overlay);
+}
+
+/* Secondary cards: pronounced top-light gradient + elevation shadow */
+[data-theme="dark"] .section-card:not(.section-card--primary) {
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.06), rgba(255,255,255,0.01)),
+    var(--surface-card);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    var(--shadow-elevation-2),
+    var(--highlight-edge);
+}
+
+/* Details card: strongest gradient + deepest shadow + accent glow ring */
+[data-theme="dark"] .section-card--primary {
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(255,255,255,0.015)),
+    var(--surface-card-primary);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    var(--shadow-elevation-3),
+    var(--highlight-edge),
+    var(--accent-glow);
+}
+
+/* Overlay header: stronger depth separator */
+[data-theme="dark"] .overlay-header {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05),
+    0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 1 — Journey Foundation (Structure + Workflow)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Journey List View ──────────────────────────────────────────────── */
+.journey-list-view {
+  padding: 0;
+  max-width: 860px; /* prevent journey content from stretching on very wide screens */
+}
+.journey-list__header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* ── Journey Cards ──────────────────────────────────────────────────── */
+.journey-cards {
+  display: grid;
+  gap: 12px;
+}
+.journey-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 10px);
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.journey-card:hover,
+.journey-card:focus-visible {
+  border-color: var(--primary, #2563eb);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.10);
+  outline: none;
+}
+.journey-card__name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text, #1e293b);
+  margin-bottom: 4px;
+}
+.journey-card__desc {
+  font-size: 0.875rem;
+  color: var(--text-muted, #64748b);
+  margin-bottom: 8px;
+}
+.journey-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.journey-card__count {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+}
+
+/* ── Journey Detail View ────────────────────────────────────────────── */
+.journey-detail-view {
+  padding: 0;
+}
+.journey-detail__header {
+  margin-bottom: 24px;
+}
+.journey-detail__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.journey-detail__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text, #1e293b);
+  margin: 0;
+}
+.journey-detail__desc {
+  font-size: 0.9rem;
+  color: var(--text-muted, #64748b);
+  margin-top: 4px;
+}
+
+.journey-detail__section {
+  margin-top: 0;
+}
+.journey-detail__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.journey-detail__section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text, #1e293b);
+  margin: 0;
+}
+
+/* ── Journey Trip List (reorderable) ────────────────────────────────── */
+.journey-trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.journey-trip-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius, 8px);
+  padding: 10px 14px;
+  transition: box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.journey-trip-item--dragging {
+  opacity: 0.5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+.journey-trip-item__grip {
+  cursor: grab;
+  color: var(--text-muted, #64748b);
+  font-size: 1.1rem;
+  user-select: none;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.journey-trip-item__grip:active {
+  cursor: grabbing;
+}
+.journey-trip-item__order {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary, #2563eb);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.journey-trip-item__info {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+.journey-trip-item__info:hover .journey-trip-item__name {
+  color: var(--primary, #2563eb);
+}
+.journey-trip-item__name {
+  font-weight: 600;
+  color: var(--text, #1e293b);
+  font-size: 0.95rem;
+  transition: color 0.15s ease;
+}
+.journey-trip-item__dest {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+  margin-top: 1px;
+}
+.journey-trip-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.journey-trip-item__dates {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+}
+.journey-trip-item__actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── Journey Modal ──────────────────────────────────────────────────── */
+.journey-modal {
+  background: var(--surface, #fff);
+  border-radius: var(--radius-lg, 10px);
+  padding: 24px;
+  width: 90%;
+  max-width: 420px;
+  margin: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.20);
+}
+.journey-modal__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text, #1e293b);
+  margin: 0 0 16px 0;
+}
+.journey-modal__field {
+  margin-bottom: 12px;
+}
+.journey-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+.journey-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.journey-modal__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius, 8px);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.journey-modal__option:hover,
+.journey-modal__option:focus-visible {
+  background: rgba(37, 99, 235, 0.06);
+  border-color: var(--primary, #2563eb);
+  outline: none;
+}
+.journey-modal__option-name {
+  font-weight: 600;
+  color: var(--text, #1e293b);
+}
+.journey-modal__option-count {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+}
+.journey-modal__divider {
+  height: 1px;
+  background: var(--border, #e2e8f0);
+  margin: 6px 0;
+}
+.journey-modal__empty {
+  text-align: center;
+  padding: 16px 0;
+}
+
+/* ── Trip Overlay: Journey linked display ───────────────────────────── */
+.trip-journey-linked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%; /* take full width inside the disclosure flex container */
+}
+.trip-journey-linked__name {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: var(--radius, 8px);
+  color: var(--primary, #2563eb);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.trip-journey-linked__name:hover {
+  background: rgba(37, 99, 235, 0.10);
+}
+
+/* ── Danger text button variant ─────────────────────────────────────── */
+.btn--danger-text {
+  color: var(--danger, #ef4444);
+  background: transparent;
+  border: none;
+}
+.btn--danger-text:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+.btn--danger {
+  background: var(--danger, #ef4444);
+  color: #fff;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(239, 68, 68, 0.18);
+}
+.btn--danger:hover {
+  background: #dc2626;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(239, 68, 68, 0.22);
+  transform: translateY(-1px);
+}
+.btn--icon {
+  padding: 4px 8px;
+  min-width: unset;
+  line-height: 1;
+}
+
+/* ── Responsive: mobile adjustments ─────────────────────────────────── */
+@media (max-width: 640px) {
+  .journey-trip-item__actions {
+    flex-direction: column;
+  }
+  .journey-detail__title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 1.1 — Usability + Correctness Pass
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* A1: Journey modal always on top of Trip overlay
+   Trip overlay backdrop: z-index 200
+   Journey modal backdrop: z-index 220 (highest)             */
+.overlay-backdrop--journey {
+  z-index: 220;
+}
+
+/* B4: Journey List cards — grid, not full-width            */
+.journey-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+/* B5: Journey Detail — 2-column trip grid on desktop       */
+.journey-trip-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+/* Drag hint helper text                                     */
+.journey-drag-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+  margin: 0 0 8px 0;
+  text-align: right;
+}
+
+/* De-emphasize the up/down reorder buttons — drag is primary */
+.journey-trip-item__actions .btn--icon:not(.btn--danger-text) {
+  opacity: 0.45;
+  font-size: 0.75rem;
+}
+.journey-trip-item__actions .btn--icon:not(.btn--danger-text):hover:not(:disabled) {
+  opacity: 1;
+}
+.journey-trip-item__actions .btn--icon:disabled {
+  opacity: 0.18;
+}
+
+/* C6: Journey date range on cards and detail               */
+.journey-card__meta-sep {
+  color: var(--text-muted, #64748b);
+  margin: 0 2px;
+}
+.journey-card__dates {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+}
+.journey-card__undated {
+  font-size: 0.75rem;
+  color: var(--text-muted, #64748b);
+  margin-left: 4px;
+  opacity: 0.8;
+}
+.journey-detail__dates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.journey-detail__dates-text {
+  font-size: 0.875rem;
+  color: var(--text-muted, #64748b);
+}
+
+/* D7: Trip overlay — linked journey pill contrast fix
+   Old: blue text on faint blue bg (low contrast in dark)
+   New: neutral surface, --text color, accent left border   */
+.trip-journey-linked__name {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--surface, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  border-left: 3px solid var(--primary, #2563eb);
+  border-radius: var(--radius, 8px);
+  color: var(--text, #1e293b);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.trip-journey-linked__name::before {
+  content: '↗';
+  font-size: 0.8em;
+  color: var(--primary, #2563eb);
+  flex-shrink: 0;
+}
+.trip-journey-linked__name:hover {
+  background: var(--surface-hover, rgba(37, 99, 235, 0.04));
+}
+[data-theme="dark"] .trip-journey-linked__name {
+  background: var(--surface-card, hsl(215, 22%, 18%));
+  border-color: var(--overlay-border, rgba(255, 255, 255, 0.09));
+  border-left-color: rgba(96, 165, 250, 0.6);
+  color: var(--text, #e2e8f0);
+}
+[data-theme="dark"] .trip-journey-linked__name::before {
+  color: rgba(96, 165, 250, 0.8);
+}
+[data-theme="dark"] .trip-journey-linked__name:hover {
+  background: hsl(215, 25%, 22%);
+}
+
+/* E8: "Create a new trip" link inside add-trip modal       */
+.journey-modal__create-trip-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: 1px dashed var(--border, #e2e8f0);
+  border-radius: var(--radius, 8px);
+  color: var(--primary, #2563eb);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.journey-modal__create-trip-btn:hover {
+  background: rgba(37, 99, 235, 0.05);
+  border-color: var(--primary, #2563eb);
+}
+[data-theme="dark"] .journey-modal__create-trip-btn {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(96, 165, 250, 0.9);
+}
+[data-theme="dark"] .journey-modal__create-trip-btn:hover {
+  background: rgba(96, 165, 250, 0.08);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+/* F9: Journey list explanation text                        */
+.journey-list__intro {
+  font-size: 0.875rem;
+  color: var(--text-muted, #64748b);
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+/* B5: 1-column on narrow screens (override 2-column grid)  */
+@media (max-width: 768px) {
+  .journey-trip-list {
+    grid-template-columns: 1fr;
+  }
+  .journey-drag-hint {
+    text-align: left;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 1.2 — Journeys Next Batch
+   1. Empty state consolidated (HTML-only change)
+   2. Card description truncation
+   3. Drag hint inline in section header
+   4. Timeline left-rail on trip cards
+   5-8. Verified complete from Phase 1.1 (date range, z-index, ESC, contrast)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 2: Truncate journey card description at 2 lines ──────────────────── */
+.journey-card__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 3: Section header right-side group (drag hint + Add Trip btn) ─────── */
+.journey-detail__section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.journey-drag-hint--inline {
+  font-size: 0.78rem;
+  color: var(--text-muted, #64748b);
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* 4: Timeline rail — colored left border gives step/flow feel ───────── */
+/* Overrides the `border: 1px solid var(--border)` shorthand from Phase 1 */
+.journey-trip-item {
+  border-left: 3px solid var(--primary, #2563eb);
+}
+[data-theme="dark"] .journey-trip-item {
+  border-left-color: rgba(96, 165, 250, 0.50);
+}
+/* Keep the timeline color visible even while dragging */
+.journey-trip-item--dragging {
+  border-left-color: var(--primary, #2563eb);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 2 — Journey UX + History Toggle
+   A. Journey picker z-index verified (already 220 from Phase 1.1)
+   B. Trip page journey control contrast verified (Phase 1.1)
+   C. Journey picker modal — search + remove-from-journey
+   D. Add-trip modal — search input
+   E. Journey list copy (HTML-only changes)
+   F. Journey History toggle
+   G. ESC behavior verified (Phase 1.1)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Journey list header: space-between so History toggle sits left,
+   New Journey button sits right                                     */
+.journey-list__header {
+  justify-content: space-between;
+}
+
+/* Journey modal search input — modest top margin below title        */
+.journey-modal__search {
+  margin-bottom: 10px;
+}
+
+/* Remove-from-journey section in select mode                        */
+.journey-modal__remove-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+[data-theme="dark"] .journey-modal__remove-section {
+  border-top-color: rgba(255, 255, 255, 0.09);
+}
+.journey-modal__remove-btn {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: 1px solid var(--error, #ef4444);
+  border-radius: var(--radius, 8px);
+  color: var(--error, #ef4444);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+.journey-modal__remove-btn:hover {
+  background: rgba(239, 68, 68, 0.06);
+}
+[data-theme="dark"] .journey-modal__remove-btn {
+  border-color: rgba(248, 113, 113, 0.5);
+  color: rgba(248, 113, 113, 0.9);
+}
+[data-theme="dark"] .journey-modal__remove-btn:hover {
+  background: rgba(248, 113, 113, 0.08);
+}
+
+/* Journey modal: max-height + scroll so long journey lists don't overflow */
+.journey-modal__list {
+  max-height: 280px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 3 — First-Time UX
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Welcome card — shown when no trips exist yet                       */
+.welcome-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px 32px;
+  margin-top: 8px;
+}
+.welcome-card__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin-bottom: 16px;
+  user-select: none;
+}
+.welcome-card__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+.welcome-card__body {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  max-width: 300px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Workflow hint — muted step guide below quick-add on first visit   */
+.controls-panel__workflow-hint {
+  margin: 6px 0 0 0;
+  padding: 0 4px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
+/* Danger variant for sidebar action button (Clear all data)         */
+.sidebar__action-btn--danger {
+  color: var(--error, #ef4444);
+}
+.sidebar__action-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.06);
+  color: var(--error, #ef4444);
+}
+.sidebar__action-btn--danger svg {
+  color: var(--error, #ef4444);
+}
+[data-theme="dark"] .sidebar__action-btn--danger {
+  color: rgba(248, 113, 113, 0.9);
+}
+[data-theme="dark"] .sidebar__action-btn--danger:hover {
+  background: rgba(248, 113, 113, 0.08);
+  color: rgba(248, 113, 113, 0.9);
+}
+[data-theme="dark"] .sidebar__action-btn--danger svg {
+  color: rgba(248, 113, 113, 0.9);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 4 — Trip Creation Simplification
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Welcome card helper line (smaller, under the body copy)           */
+.welcome-card__hint {
+  margin-top: 10px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+/* Journey progressive disclosure — bottom of Details section        */
+.trip-journey-disclosure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border, #e2e8f0);
+  font-size: 0.8125rem;
+}
+[data-theme="dark"] .trip-journey-disclosure {
+  border-top-color: rgba(255, 255, 255, 0.09);
+}
+
+/* "Part of:" label */
+.trip-journey-disclosure__label {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+/* Linked journey name */
+.trip-journey-disclosure__name {
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+/* Separator dot between Change · Remove */
+.trip-journey-disclosure__sep {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* "Change" and "Remove" inline action links */
+.trip-journey-disclosure__action {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  transition: color 0.12s;
+}
+.trip-journey-disclosure__action:hover {
+  color: var(--text-primary);
+}
+.trip-journey-disclosure__action--remove {
+  color: var(--error, #ef4444);
+  text-decoration-color: rgba(239, 68, 68, 0.4);
+}
+.trip-journey-disclosure__action--remove:hover {
+  color: var(--error, #ef4444);
+  opacity: 0.8;
+}
+[data-theme="dark"] .trip-journey-disclosure__action--remove {
+  color: rgba(248, 113, 113, 0.85);
+}
+
+/* "Create or join a Journey →" CTA pill */
+.trip-journey-disclosure__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: var(--surface-hover, #f1f5f9);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text, #1e293b);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  text-decoration: none;
+}
+.trip-journey-disclosure__link::before {
+  content: '↗';
+  font-size: 0.875em;
+  opacity: 0.65;
+}
+.trip-journey-disclosure__link:hover {
+  background: var(--surface-active, #e2e8f0);
+  border-color: var(--border-strong, #cbd5e1);
+  color: var(--color-primary, #2563eb);
+  text-decoration: underline;
+}
+.trip-journey-disclosure__link:focus-visible {
+  outline: 2px solid var(--focus-ring, var(--color-primary, #2563eb));
+  outline-offset: 3px;
+}
+[data-theme="dark"] .trip-journey-disclosure__link {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text, #e2e8f0);
+}
+[data-theme="dark"] .trip-journey-disclosure__link:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #93c5fd;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 5 — Journey Clarity + First-Trip Guidance
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Journey modal explanation — shown only when no journeys exist yet */
+.journey-modal__explain {
+  margin: 0 0 12px 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* First-trip next-step hint — shown below the list when 1 trip exists */
+.first-trip-hint {
+  margin: 10px 0 0 0;
+  padding: 0 4px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 6 — Calendar Progression + Journey Clarity
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Journey disclosure: unlinked state wrapper (stacks hint + pill + example) */
+.trip-journey-disclosure__unlinked {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  text-align: center;
+}
+
+/* Example text beneath the "Create a Journey" link */
+.trip-journey-disclosure__example {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.75;
+  line-height: 1.4;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Calendar progression guidance card                                */
+.calendar-guidance-card {
+  margin-top: 12px;
+  padding: 18px 20px;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius, 8px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+[data-theme="dark"] .calendar-guidance-card {
+  background: var(--bg-card);
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.calendar-guidance-card__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+
+.calendar-guidance-card__body {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0 0 14px 0;
+  line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 7 — First-Trip Card Highlight
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* First-trip card: brief glow + "New" pill after initial creation */
+.calendar-trip--new {
+  position: relative;
+  outline: 2px solid var(--accent, #3b82f6);
+  outline-offset: -1px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+  animation: trip-new-glow 10s ease-out forwards;
+}
+[data-theme="dark"] .calendar-trip--new {
+  outline-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
+}
+
+@keyframes trip-new-glow {
+  0%   { box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.28); }
+  40%  { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14); }
+  100% { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.0); }
+}
+
+/* "New" pill badge anchored to top-right corner of the card */
+.calendar-trip--new::before {
+  content: 'New';
+  position: absolute;
+  top: -8px;
+  right: 8px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--accent, #3b82f6);
+  border-radius: 20px;
+  padding: 1px 7px;
+  line-height: 1.6;
+  pointer-events: none;
+}
+[data-theme="dark"] .calendar-trip--new::before {
+  background: #60a5fa;
+  color: #0f172a;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 8 — Quarter View Clarity & Polish
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Dark mode: Idea badge — boost contrast to match other dark-mode badge colors */
+[data-theme="dark"] .badge--idea {
+  background: rgba(20, 184, 166, 0.15);
+  color: #2dd4bf; /* lighter teal for better readability on dark surface */
+}
+
+/* Dark mode: quarter cards — add slight inner shadow for depth so
+   trip cards inside read as elevated above the container */
+[data-theme="dark"] .calendar-quarter {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* Dark mode: trip cards inside quarter view — slight surface-offset
+   so they visually pop above the containing quarter card */
+[data-theme="dark"] .calendar-quarter .calendar-trip {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 9 — Journeys clarity + contrast + onboarding help
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Trip overlay unlinked state: "why would I do this?" helper line
+   Sits above the CTA button, subordinate but readable in light + dark */
+.trip-journey-disclosure__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  text-align: center;
+}
+
+/* Journey list intro: inline examples callout (slightly lighter) */
+.journey-list__intro-examples {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 11 — Sidebar IA + Search Palette + Export Panel
+   A: Overlay left-offset for sidebar visibility → see overlay-backdrop/panel
+   B: Sidebar IA polish (nav order, new actions, data section)
+   C: Search command palette
+   D: Export panel
+   E: New Journey action (wires to existing createJourney flow)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── B: Sidebar IA additions ────────────────────────────────────── */
+
+/* Thin divider line between primary create actions and tools */
+.sidebar__actions-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px var(--space-3);
+  opacity: 0.6;
+}
+
+/* Kbd shortcut hint inside sidebar button (e.g. "⌘K") */
+.sidebar__kbd {
+  margin-left: auto;
+  font-size: 0.6875rem;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-muted);
+  background: var(--surface-hover, #f1f5f9);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.6;
+  letter-spacing: 0;
+  opacity: 0.8;
+}
+[data-theme="dark"] .sidebar__kbd {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Soft-primary variant — "New Journey" (slightly less prominent than New Trip) */
+.sidebar__action-btn--primary-soft {
+  background: var(--surface-hover, #f1f5f9);
+  color: var(--color-primary, #2563eb);
+  border: 1px solid var(--border);
+  font-weight: var(--font-weight-semibold);
+}
+.sidebar__action-btn--primary-soft:hover {
+  background: var(--border, #e2e8f0);
+  border-color: var(--border-hover, #cbd5e1);
+}
+[data-theme="dark"] .sidebar__action-btn--primary-soft {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+[data-theme="dark"] .sidebar__action-btn--primary-soft:hover {
+  background: rgba(59, 130, 246, 0.18);
+}
+
+/* Sub-action variant — smaller, lighter (used inside Data section) */
+.sidebar__action-btn--sub {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+.sidebar__action-btn--sub:hover {
+  color: var(--text);
+  opacity: 1;
+}
+
+/* Collapsible Data section wrapper */
+.sidebar__data-section {
+  margin-top: 4px;
+}
+
+/* Data section toggle button */
+.sidebar__data-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.12s;
+}
+.sidebar__data-toggle:hover {
+  color: var(--text);
+}
+
+/* Animated chevron */
+.sidebar__data-chevron {
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+.sidebar__data-chevron--open {
+  transform: rotate(0deg);
+}
+.sidebar__data-chevron:not(.sidebar__data-chevron--open) {
+  transform: rotate(-90deg);
+}
+
+/* Inner actions under the Data toggle */
+.sidebar__data-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 0 4px;
+}
+
+/* ── C: Search Command Palette ──────────────────────────────────── */
+
+/* Full-viewport backdrop for the palette */
+.search-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80px;
+  /* allow clicks through to backdrop for close-on-click */
+}
+
+/* The palette card itself */
+.search-palette {
+  width: 100%;
+  max-width: 560px;
+  background: var(--surface, #fff);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.20), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 120px);
+}
+[data-theme="dark"] .search-palette {
+  background: var(--surface-card, hsl(215, 22%, 14%));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Input row at the top */
+.search-palette__input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+[data-theme="dark"] .search-palette__input-row {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.search-palette__icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-palette__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  font-family: var(--font-family);
+  min-width: 0;
+}
+.search-palette__input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ESC badge */
+.search-palette__esc {
+  font-size: 0.6875rem;
+  font-family: var(--font-family);
+  color: var(--text-muted);
+  background: var(--surface-hover, #f1f5f9);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+[data-theme="dark"] .search-palette__esc {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Hint / empty states */
+.search-palette__hint,
+.search-palette__empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+.search-palette__empty strong {
+  color: var(--text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Scrollable results container */
+.search-palette__results {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 0 4px;
+}
+
+/* Section header (Trips / Journeys) */
+.search-palette__section {
+  padding: 0 0 4px;
+}
+.search-palette__section-label {
+  padding: 6px 16px 4px;
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Individual result row */
+.search-palette__result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+.search-palette__result:hover,
+.search-palette__result:focus-visible {
+  background: var(--surface-hover, #f8fafc);
+  outline: none;
+}
+[data-theme="dark"] .search-palette__result:hover,
+[data-theme="dark"] .search-palette__result:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.search-palette__result-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.search-palette__result-title {
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-palette__result-sub {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Type badge (Trip / Journey) */
+.search-palette__result-badge {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--badge-planning-bg, rgba(37, 99, 235, 0.1));
+  color: var(--badge-planning-text, #2563eb);
+  letter-spacing: 0.02em;
+}
+.search-palette__result-badge--journey {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+[data-theme="dark"] .search-palette__result-badge {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}
+[data-theme="dark"] .search-palette__result-badge--journey {
+  background: rgba(167, 139, 250, 0.15);
+  color: #c4b5fd;
+}
+
+/* "Keep typing" overflow hint */
+.search-palette__overflow {
+  padding: 8px 16px 12px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.75;
+}
+
+/* Mobile: full-width palette near the top */
+@media (max-width: 640px) {
+  .search-palette-backdrop {
+    padding-top: 40px;
+    padding-left: 12px;
+    padding-right: 12px;
+    align-items: flex-start;
+  }
+  .search-palette {
+    max-height: calc(100vh - 60px);
+  }
+}
+
+/* ── D: Export Panel ────────────────────────────────────────────── */
+
+/* Backdrop */
+.export-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* Panel card */
+.export-panel {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface, #fff);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.20), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+[data-theme="dark"] .export-panel {
+  background: var(--surface-card, hsl(215, 22%, 14%));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Header row */
+.export-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+[data-theme="dark"] .export-panel__header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.export-panel__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--heading);
+}
+
+.export-panel__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.12s, color 0.12s;
+}
+.export-panel__close:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+/* Reassurance note */
+.export-panel__note {
+  margin: 0;
+  padding: 12px 20px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  border-bottom: 1px solid var(--border);
+}
+[data-theme="dark"] .export-panel__note {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+.export-panel__note strong {
+  color: var(--text);
+}
+
+/* Option list */
+.export-panel__options {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+/* Individual export option row */
+.export-panel__option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+.export-panel__option:hover,
+.export-panel__option:focus-visible {
+  background: var(--surface-hover, #f8fafc);
+  outline: none;
+}
+[data-theme="dark"] .export-panel__option:hover,
+[data-theme="dark"] .export-panel__option:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Icon column */
+.export-panel__option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--badge-planning-bg, rgba(37, 99, 235, 0.08));
+  color: var(--color-primary, #2563eb);
+  flex-shrink: 0;
+}
+[data-theme="dark"] .export-panel__option-icon {
+  background: rgba(96, 165, 250, 0.12);
+  color: #93c5fd;
+}
+
+.export-panel__option-body {
+  flex: 1;
+  min-width: 0;
+}
+.export-panel__option-title {
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.export-panel__option-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Mobile: full-width panel */
+@media (max-width: 640px) {
+  .export-panel-backdrop {
+    padding: 16px;
+    align-items: flex-end;
+  }
+  .export-panel {
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Phase 12 — Journey card polish + spacing micro-polish
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Journey card: flex column so footer always sits at bottom ── */
+.journey-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Date range line: secondary header line below card name ── */
+.journey-card__date-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.journey-card__dates-text {
+  font-size: 0.8125rem;
+  color: var(--color-primary, #2563eb);
+  font-weight: 500;
+}
+[data-theme="dark"] .journey-card__dates-text {
+  color: #93c5fd;
+}
+
+/* ── Undated pill (replaces plain parenthetical text) ── */
+.journey-card__undated-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted, #64748b);
+  background: var(--surface-hover, #f1f5f9);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 20px;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+
+/* ── Description: a little breathing room before footer ── */
+.journey-card__desc {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+/* ── Footer: trip count + optional "Done" badge ── */
+.journey-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+.journey-card__count {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted, #64748b);
+}
+
+/* ── Historical "Done" badge ── */
+.journey-card__hist-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #16a34a;
+  background: #dcfce7;
+  border-radius: 20px;
+  padding: 2px 8px;
+  letter-spacing: 0.02em;
+}
+[data-theme="dark"] .journey-card__hist-badge {
+  color: #86efac;
+  background: rgba(134, 239, 172, 0.12);
+}
+
+/* ── Journeys page: stats row gets same bottom margin as on My Trips ── */
+.journey-list-view .stats-row {
+  margin-bottom: var(--space-4, 16px);
+}
+
+/* ── Journey card: stronger hover elevation to match btn cards ── */
+.journey-card:hover,
+.journey-card:focus-visible {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+/* ── Spacing: journey list header consistent margin ── */
+.journey-list__header {
+  margin-bottom: 12px;
+}
+
+/* ── Spacing: intro text consistent top margin ── */
+.journey-list__intro {
+  margin-top: 0;
+  margin-bottom: var(--space-4, 16px);
+}
+
+/* ── stats-card: ensure white-space doesn't truncate the year label ── */
+.stats-card__label {
+  white-space: normal;
+  word-break: keep-all;
+}
+
+/* Mobile: journey cards single column below 480px */
+@media (max-width: 480px) {
+  .journey-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Phase 13 — Delight + Clarity polish batch
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── #1 Trip Completed card animation ─────────────────────────────────────── */
+@keyframes completedPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.40); }
+  40%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.14); transform: translateY(-2px); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.00); transform: translateY(0); }
+}
+@keyframes checkSlideIn {
+  0%   { opacity: 0; transform: scale(0.4) translateX(-4px); }
+  60%  { opacity: 1; transform: scale(1.15) translateX(0); }
+  100% { opacity: 1; transform: scale(1) translateX(0); }
+}
+.calendar-trip--completed-pulse {
+  animation: completedPulse 0.9s ease-out forwards;
+  border-color: rgba(16, 185, 129, 0.55) !important;
+}
+[data-theme="dark"] .calendar-trip--completed-pulse {
+  border-color: rgba(52, 211, 153, 0.45) !important;
+}
+.calendar-trip__completed-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #10b981;
+  animation: checkSlideIn 0.5s ease-out forwards;
+  margin-left: 2px;
+}
+[data-theme="dark"] .calendar-trip__completed-check {
+  color: #34d399;
+}
+@media (prefers-reduced-motion: reduce) {
+  .calendar-trip--completed-pulse { animation: none; border-color: rgba(16, 185, 129, 0.55) !important; }
+  .calendar-trip__completed-check { animation: none; }
+}
+
+/* ── #2 Year At a Glance insight line ─────────────────────────────────────── */
+.calendar-year__insight {
+  font-size: 0.8125rem;
+  color: var(--text-muted, #64748b);
+  margin: 0 0 12px 0;
+  padding: 0;
+  letter-spacing: 0.01em;
+}
+
+/* ── #3 Journey route line ─────────────────────────────────────────────────── */
+.journey-card__route {
+  font-size: 0.8125rem;
+  color: var(--text-muted, #64748b);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+  letter-spacing: 0.005em;
+}
+
+/* ── #6 Calendar "aha" first-visit callout ─────────────────────────────────── */
+@keyframes ahaSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.calendar-aha-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(37, 99, 235, 0.07);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: var(--radius-md, 8px);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  animation: ahaSlideDown 0.3s ease-out;
+}
+[data-theme="dark"] .calendar-aha-callout {
+  background: rgba(96, 165, 250, 0.10);
+  border-color: rgba(96, 165, 250, 0.25);
+}
+.calendar-aha-callout__text {
+  font-size: 0.875rem;
+  color: var(--color-primary, #2563eb);
+  font-weight: 500;
+}
+[data-theme="dark"] .calendar-aha-callout__text {
+  color: #93c5fd;
+}
+.calendar-aha-callout__close {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary, #2563eb);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.12s ease;
+}
+.calendar-aha-callout__close:hover {
+  background: rgba(37, 99, 235, 0.10);
+}
+[data-theme="dark"] .calendar-aha-callout__close {
+  color: #93c5fd;
+}
+@media (prefers-reduced-motion: reduce) {
+  .calendar-aha-callout { animation: none; }
+}
+
+/* ── #8B "Your year is open" nudge ────────────────────────────────────────── */
+.year-open-nudge {
+  font-size: 0.9375rem;
+  color: var(--text-muted, #64748b);
+  font-style: italic;
+  margin: 0 0 16px 0;
+  padding: 10px 14px;
+  background: var(--surface-hover, #f8fafc);
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border, #e2e8f0);
+}
+[data-theme="dark"] .year-open-nudge {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border);
+}
+
+/* ── #8C Current quarter accent ────────────────────────────────────────────── */
+.calendar-quarter--current {
+  border-left: 3px solid var(--color-primary, #2563eb);
+  padding-left: calc(var(--space-3, 12px) - 3px); /* compensate for border so content stays aligned */
+  background: rgba(37, 99, 235, 0.03);
+}
+[data-theme="dark"] .calendar-quarter--current {
+  border-left-color: #93c5fd;
+  background: rgba(147, 197, 253, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Phase 14 — First-run onboarding modal
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes onboardingFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes onboardingSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Backdrop */
+.onboarding-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300; /* above all other panels: journey modal 220, palette/export 210 */
+  background: rgba(0, 0, 0, 0.58);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: onboardingFadeIn 0.22s ease-out;
+}
+
+/* Modal card */
+.onboarding-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 12px);
+  padding: 40px 44px;
+  max-width: 540px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.24), 0 6px 20px rgba(0, 0, 0, 0.12);
+  animation: onboardingSlideUp 0.28s ease-out;
+}
+
+/* Plane icon */
+.onboarding-modal__icon {
+  display: block;
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+/* Title */
+.onboarding-modal__title {
+  font-size: 1.5625rem;
+  font-weight: 700;
+  color: var(--heading, var(--text));
+  text-align: center;
+  margin: 0 0 16px 0;
+  line-height: 1.25;
+}
+
+/* Mission statement — prominently styled */
+.onboarding-modal__mission {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-primary, #2563eb);
+  line-height: 1.55;
+  text-align: center;
+  margin: 0 0 18px 0;
+  padding: 14px 18px;
+  background: rgba(37, 99, 235, 0.07);
+  border-left: 3px solid var(--color-primary, #2563eb);
+  border-radius: var(--radius-md, 8px);
+}
+[data-theme="dark"] .onboarding-modal__mission {
+  background: rgba(96, 165, 250, 0.10);
+  border-left-color: #93c5fd;
+  color: #93c5fd;
+}
+
+/* Explanation paragraph */
+.onboarding-modal__desc {
+  font-size: 0.9375rem;
+  color: var(--text-muted, #64748b);
+  line-height: 1.65;
+  margin: 0 0 22px 0;
+}
+
+/* 3-step numbered list */
+.onboarding-modal__steps {
+  list-style: none;
+  margin: 0 0 22px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.onboarding-modal__steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+.onboarding-modal__step-num {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-primary, #2563eb);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.onboarding-modal__step-body {
+  font-size: 0.9375rem;
+  color: var(--text, #1e293b);
+  line-height: 1.55;
+  padding-top: 4px;
+}
+.onboarding-modal__step-body strong {
+  color: var(--heading, var(--text));
+  font-weight: 600;
+}
+
+/* CTA nudge */
+.onboarding-modal__cta {
+  font-size: 0.9375rem;
+  color: var(--text-muted, #64748b);
+  font-style: italic;
+  text-align: center;
+  margin: 0 0 26px 0;
+}
+
+/* Footer with "Got it" button */
+.onboarding-modal__footer {
+  display: flex;
+  justify-content: center;
+}
+.onboarding-modal__btn {
+  min-width: 140px;
+  font-size: 1rem;
+  padding: 12px 32px;
+}
+
+/* Mobile tweaks */
+@media (max-width: 520px) {
+  .onboarding-modal {
+    padding: 30px 24px;
+  }
+  .onboarding-modal__title {
+    font-size: 1.375rem;
+  }
+  .onboarding-modal__btn {
+    width: 100%;
+  }
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-backdrop { animation: none; }
+  .onboarding-modal    { animation: none; }
+}
+
+/* ============================================================
+   Final v2.0.0 Polish — onboarding, welcome card, journey,
+   guidance card, dark mode depth
+   ============================================================ */
+
+/* ── Onboarding step sub-sentence ─────────────────────────────────────────── */
+.onboarding-modal__step-sub {
+  margin: 5px 0 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-weight: var(--font-weight-normal);
+}
+
+/* ── Onboarding Skip / "Not now" link ─────────────────────────────────────── */
+.onboarding-modal__skip {
+  display: block;
+  margin: 10px auto 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--border-hover);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+.onboarding-modal__skip:hover {
+  color: var(--text);
+}
+.onboarding-modal__skip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Welcome card: 3-step checklist ───────────────────────────────────────── */
+.welcome-card__steps {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+  text-align: left;
+}
+
+.welcome-card__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.welcome-card__step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-bold);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.welcome-card__step-num--highlight {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.welcome-card__step--highlight .welcome-card__step-text {
+  color: var(--heading);
+}
+
+.welcome-card__step-sub {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ── Calendar guidance card: eyebrow + actions row ────────────────────────── */
+.calendar-guidance-card__eyebrow {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  margin: 0 0 4px 0;
+}
+
+.calendar-guidance-card__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Journey helper row (trip detail, unlinked state) ─────────────────────── */
+.trip-journey-helper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0 4px;
+}
+
+.trip-journey-helper__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.trip-journey-helper__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 2px;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+              text-decoration-color var(--transition-fast), color var(--transition-fast);
+  width: fit-content;
+}
+
+.trip-journey-helper__cta:hover {
+  background: rgba(37, 99, 235, 0.05);
+  border-color: var(--color-primary);
+  text-decoration-color: var(--color-primary);
+}
+
+.trip-journey-helper__cta:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.trip-journey-helper__cta-icon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.trip-journey-helper__arrow {
+  font-size: 0.875em;
+  margin-left: 2px;
+  transition: transform var(--transition-fast);
+}
+
+.trip-journey-helper__cta:hover .trip-journey-helper__arrow {
+  transform: translateX(3px);
+}
+
+.trip-journey-helper__example {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: left;
+  opacity: 0.85;
+}
+
+[data-theme="dark"] .trip-journey-helper__cta {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .trip-journey-helper__cta:hover {
+  background: rgba(96, 165, 250, 0.08);
+  border-color: rgba(96, 165, 250, 0.35);
+}
+
+/* ── Journey modal: always-on helper paragraph ─────────────────────────────── */
+.journey-modal__helper {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  background: var(--surface-hover);
+  border-left: 3px solid var(--border-hover);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .journey-modal__helper {
+  background: rgba(255, 255, 255, 0.04);
+  border-left-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Dark mode card depth: subtle gradient overlay ────────────────────────── */
+[data-theme="dark"] .trip-card {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.035) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  ), var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .trip-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(37, 99, 235, 0.35);
+}
+
+[data-theme="dark"] .journey-card {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.008) 100%
+  ), var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .journey-card:hover,
+[data-theme="dark"] .journey-card:focus-visible {
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(37, 99, 235, 0.35);
+}
+
+/* Ensure Details overlay cards read as elevated in dark mode */
+[data-theme="dark"] .detail-section {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.025) 0%,
+    transparent 40%
+  ), var(--surface);
+}
+
+/* ── Stats filter indicator ─────────────────────────────────────────────── */
+.stats-filter-indicator {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-1);
+}
+
+.stats-filter-indicator__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+[data-theme="dark"] .stats-filter-indicator__pill {
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+/* ── Export panel: section label dividers ─────────────────────────────── */
+.export-panel__section-label {
+  padding: 10px 20px 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+/* Add a top border to the "All trips" section label (not the first one) */
+.export-panel__section-label + .export-panel__section-label,
+.export-panel__option ~ .export-panel__section-label {
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 14px;
+}
+[data-theme="dark"] .export-panel__option ~ .export-panel__section-label {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Export panel: disabled option state ─────────────────────────────── */
+.export-panel__option--disabled,
+.export-panel__option:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.export-panel__option--disabled:hover,
+.export-panel__option:disabled:hover {
+  background: none;
+}
+[data-theme="dark"] .export-panel__option--disabled:hover,
+[data-theme="dark"] .export-panel__option:disabled:hover {
+  background: none;
+}
+
+/* Hint text inside disabled option desc */
+.export-panel__option-disabled-hint {
+  font-style: italic;
+}
+
+/* ── Sidebar: Backup row + info button ───────────────────────────────── */
+.sidebar__backup-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Make the main Backup action button fill available space */
+.sidebar__backup-main-btn {
+  flex: 1;
+}
+
+/* The circular (i) info toggle button */
+.sidebar__backup-info-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.sidebar__backup-info-btn:hover,
+.sidebar__backup-info-btn:focus-visible {
+  background: var(--surface-hover);
+  color: var(--text);
+  outline: none;
+}
+.sidebar__backup-info-btn--active {
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+[data-theme="dark"] .sidebar__backup-info-btn--active {
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+/* The expandable info panel below the Backup row */
+.sidebar__backup-info-panel {
+  margin: 6px 0 4px 0;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+[data-theme="dark"] .sidebar__backup-info-panel {
+  background: rgba(96, 165, 250, 0.07);
+  border-color: rgba(96, 165, 250, 0.18);
+}
+
+.sidebar__backup-info-text {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.sidebar__backup-info-text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PROMPT 3 — Tasks/Expenses/Notes/Journey improvements
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── A) Task checkbox — smaller, lighter ────────────────────────────── */
+.todo-checkbox {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin-top: 3px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  opacity: 0.75;
+  transition: opacity 0.1s;
+}
+.todo-checkbox:hover,
+.todo-checkbox:focus {
+  opacity: 1;
+}
+
+/* Tasks header tip */
+.tasks-tip {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 2px;
+  letter-spacing: 0.01em;
+}
+
+/* ── B) Task note multiline: clamp + expand ─────────────────────────── */
+.todo-description {
+  white-space: pre-line; /* Preserve line breaks */
+  word-break: break-word;
+}
+.todo-description--clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.todo-desc-toggle {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 0.7rem;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.4;
+}
+.todo-desc-toggle:hover {
+  text-decoration: underline;
+}
+
+/* ── C) Notes display mode (linkified) ──────────────────────────────── */
+.notes-display {
+  cursor: text;
+  white-space: pre-line;
+  word-break: break-word;
+  min-height: 120px;
+  transition: background 0.1s;
+  line-height: 1.6;
+}
+.notes-display:hover {
+  background: var(--surface-hover, rgba(0,0,0,0.03));
+}
+[data-theme="dark"] .notes-display:hover {
+  background: rgba(255,255,255,0.04);
+}
+.notes-display--empty {
+  color: var(--text-muted);
+}
+.notes-display__placeholder {
+  color: var(--text-muted);
+  font-style: normal;
+}
+/* Clickable links inside notes */
+.notes-link {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+.notes-link:hover {
+  opacity: 0.8;
+}
+
+/* ── D) Collapsed section header stat pill ──────────────────────────── */
+.section-header-stat {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+  border-radius: 999px;
+  padding: 1px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* ── E/F) Compact tasks + expenses ──────────────────────────────────── */
+/* Tighter todo-item */
+.todo-item {
+  gap: var(--space-2) !important;
+  padding: var(--space-2) !important;
+}
+/* Keep touch targets by ensuring minimum click area */
+.todo-checkbox { touch-action: manipulation; }
+
+/* Tighter expense-item */
+.expense-item {
+  gap: var(--space-2) !important;
+  padding: var(--space-2) var(--space-3) !important;
+}
+/* Smaller expense amount to reduce visual weight */
+.expense-amount {
+  font-size: var(--font-size-base) !important;
+}
+/* Tighten todo-list gap */
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1) !important;
+}
+
+/* ── G) Journey detail header redesign ──────────────────────────────── */
+.journey-detail__topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+[data-theme="dark"] .journey-detail__topbar {
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+.journey-detail__name {
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.journey-detail__name--tappable {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  margin-left: -4px;
+  transition: background 0.12s;
+}
+.journey-detail__name--tappable:hover {
+  background: var(--surface-hover, rgba(0,0,0,0.05));
+}
+[data-theme="dark"] .journey-detail__name--tappable:hover {
+  background: rgba(255,255,255,0.07);
+}
+.journey-detail__name-input {
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.journey-detail__desc-area {
+  padding: var(--space-2) var(--space-4);
+}
+.journey-detail__desc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  margin-left: -6px;
+  transition: background 0.12s;
+  white-space: pre-line;
+}
+.journey-detail__desc:hover {
+  background: var(--surface-hover, rgba(0,0,0,0.04));
+}
+[data-theme="dark"] .journey-detail__desc:hover {
+  background: rgba(255,255,255,0.06);
+}
+.journey-detail__desc--placeholder {
+  font-style: italic;
+  opacity: 0.6;
+}
+.journey-detail__desc-input {
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+/* ── Journey Detail: date row below Details card ──────────────────── */
+.journey-detail__date-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* overlay-content-inner gap handles top spacing */
+  margin-top: -10px; /* pull up slightly — date row is compact metadata */
+}
+
+/* ── Journey Detail: strip overlay-content-inner's own padding/max-width.
+   The journey detail lives inside main__content which already provides padding,
+   so we zero out the inner wrapper's defaults — but keep gap for section spacing
+   and keep the child selector styles (.trip-field-display etc.) working. ───── */
+.journey-detail__content {
+  padding: 0;
+  max-width: none;
+  margin: 0;
+  gap: var(--space-5);
+}
+
+/* ── Journey Card: clamp long names and descriptions ─────────────────── */
+.journey-card__name {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.journey-card__desc {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* ── Help nav button: matches existing nav-btn but no active style needed ─── */
+.sidebar__nav-btn--help {
+  /* inherits all sidebar__nav-btn styles; no additional overrides needed */
+  /* colour stays muted (not primary) — it's a utility link, not a core view */
+}
+
+/* ── Example data hint panel ─────────────────────────────────────────────── */
+/* Reuses sidebar__backup-info-panel visual language; extra bottom margin
+   to separate from the following Clear all data button */
+.sidebar__example-hint-panel {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+/* Action buttons inside the example-data hint — stacked vertically so they
+   never overflow the narrow sidebar regardless of button label length */
+.sidebar__example-hint-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.sidebar__example-hint-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── "New here? Try example trips." link row inside backup reminder ────── */
+.sidebar__try-example-row {
+  margin-top: 6px;
+}
+/* Reuses sidebar__backup-toggle; no extra style needed — same muted link look */

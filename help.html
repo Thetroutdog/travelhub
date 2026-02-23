@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<!--
+  Travel Hub — Help & Guide
+  © 2026 Troutdog Adventures. All rights reserved.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Hub — Help</title>
+  <style>
+    /* ============================================
+       Design Tokens — copied from styles.css
+       ============================================ */
+
+    :root {
+      /* Theme Colors - Light */
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-hover: #f8fafc;
+      --border: #e2e8f0;
+      --border-hover: #cbd5e1;
+      --text: #334155;
+      --text-muted: #64748b;
+      --heading: #1e293b;
+
+      /* Action Colors */
+      --color-primary: #2563eb;
+      --color-primary-hover: #1d4ed8;
+      --color-success: #10b981;
+
+      /* Typography */
+      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      --font-size-xs: 0.75rem;
+      --font-size-sm: 0.875rem;
+      --font-size-base: 1rem;
+      --font-size-lg: 1.25rem;
+      --font-size-xl: 1.5rem;
+      --font-size-2xl: 2rem;
+
+      --font-weight-normal: 400;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+
+      /* Spacing Scale */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+
+      /* Border Radius */
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+      /* Focus & Overlays */
+      --focus-ring: rgba(37, 99, 235, 0.5);
+
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-base: 200ms ease;
+
+      /* Help-page specific */
+      --primary-tint: rgba(37, 99, 235, 0.07);
+      --primary-border: rgba(37, 99, 235, 0.18);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-hover: #334155;
+      --border: #334155;
+      --border-hover: #475569;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --heading: #f1f5f9;
+
+      --color-primary: #3b82f6;
+      --color-primary-hover: #2563eb;
+      --color-success: #10b981;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+
+      --focus-ring: rgba(59, 130, 246, 0.6);
+
+      --primary-tint: rgba(59, 130, 246, 0.10);
+      --primary-border: rgba(59, 130, 246, 0.22);
+    }
+
+    /* ============================================
+       Base Reset
+       ============================================ */
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-family);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-normal);
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color var(--transition-base), color var(--transition-base);
+      padding-bottom: var(--space-12);
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ============================================
+       Layout
+       ============================================ */
+
+    .page-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    @media (max-width: 600px) {
+      .page-wrap {
+        padding: 0 var(--space-4);
+      }
+    }
+
+    /* ============================================
+       Page Header
+       ============================================ */
+
+    .page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      transition: background-color var(--transition-base), border-color var(--transition-base);
+    }
+
+    .page-header__inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: var(--space-4) var(--space-6);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    @media (max-width: 600px) {
+      .page-header__inner {
+        padding: var(--space-3) var(--space-4);
+        flex-wrap: wrap;
+        gap: var(--space-2);
+      }
+    }
+
+    .page-header__back {
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: color var(--transition-fast);
+    }
+    .page-header__back:hover {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .page-header__divider {
+      color: var(--border-hover);
+      flex-shrink: 0;
+      font-size: var(--font-size-sm);
+    }
+
+    .page-header__titles {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .page-header__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      color: var(--heading);
+      line-height: 1.2;
+    }
+
+    .page-header__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      background: var(--surface-hover);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px var(--space-3);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+      white-space: nowrap;
+    }
+    .theme-toggle:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+    }
+    .theme-toggle svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ============================================
+       Content area
+       ============================================ */
+
+    .content {
+      padding-top: var(--space-10);
+    }
+
+    /* ============================================
+       Sections
+       ============================================ */
+
+    .section {
+      margin-bottom: var(--space-10);
+    }
+
+    .section__header {
+      margin-bottom: var(--space-5);
+    }
+
+    .section__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-1);
+    }
+
+    .section__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-bold);
+      color: var(--heading);
+      line-height: 1.25;
+    }
+
+    /* ============================================
+       Cards
+       ============================================ */
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card__icon {
+      font-size: 1.25rem;
+      display: block;
+      margin-bottom: var(--space-3);
+      line-height: 1;
+    }
+
+    .card__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      color: var(--heading);
+      margin-bottom: var(--space-2);
+    }
+
+    .card__body {
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ============================================
+       Steps
+       ============================================ */
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .step {
+      display: flex;
+      gap: var(--space-4);
+      align-items: flex-start;
+    }
+
+    .step__num {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary-tint);
+      border: 1px solid var(--primary-border);
+      color: var(--color-primary);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .step__body {
+      flex: 1;
+    }
+
+    .step__title {
+      font-weight: var(--font-weight-semibold);
+      color: var(--heading);
+      font-size: var(--font-size-base);
+      margin-bottom: var(--space-1);
+    }
+
+    .step__desc {
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .step__optional {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-primary);
+      opacity: 0.8;
+      margin-left: var(--space-2);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .step__examples {
+      margin-top: var(--space-2);
+      padding-left: var(--space-4);
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .step__examples li {
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .step__examples li::before {
+      content: '"';
+    }
+    .step__examples li::after {
+      content: '"';
+    }
+
+    /* ============================================
+       Info rows (Basics section)
+       ============================================ */
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .info-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      gap: var(--space-4);
+      align-items: flex-start;
+    }
+
+    .info-row__icon {
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+      line-height: 1;
+    }
+
+    .info-row__body {
+      flex: 1;
+    }
+
+    .info-row__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      color: var(--heading);
+      margin-bottom: var(--space-1);
+    }
+
+    .info-row__desc {
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ============================================
+       Tip / callout box
+       ============================================ */
+
+    .tip-box {
+      background: var(--primary-tint);
+      border: 1px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5) var(--space-6);
+      font-size: var(--font-size-sm);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .tip-box strong {
+      color: var(--heading);
+    }
+
+    .tip-box code {
+      font-family: inherit;
+      font-style: italic;
+      color: var(--heading);
+    }
+
+    /* ============================================
+       Tips bullet list
+       ============================================ */
+
+    .tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-size: var(--font-size-sm);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .tips-list li::before {
+      content: '→';
+      color: var(--color-primary);
+      font-weight: var(--font-weight-bold);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ============================================
+       FAQ — native <details>
+       ============================================ */
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: border-color var(--transition-fast);
+    }
+
+    .faq-item[open] {
+      border-color: var(--border-hover);
+    }
+
+    .faq-item summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      cursor: pointer;
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      color: var(--heading);
+      list-style: none;
+      user-select: none;
+      transition: background-color var(--transition-fast);
+    }
+
+    .faq-item summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-item summary:hover {
+      background-color: var(--surface-hover);
+    }
+
+    .faq-chevron {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      transition: transform var(--transition-fast);
+    }
+
+    .faq-item[open] .faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      padding: 0 var(--space-5) var(--space-4);
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      padding-top: var(--space-4);
+    }
+
+    .faq-answer strong {
+      color: var(--text);
+    }
+
+    /* ============================================
+       Footer
+       ============================================ */
+
+    .page-footer {
+      border-top: 1px solid var(--border);
+      margin-top: var(--space-12);
+      padding-top: var(--space-6);
+      text-align: center;
+    }
+
+    .page-footer__text {
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ── Page Header ────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header__inner">
+
+      <a href="./index.html" class="page-header__back">← Back to Travel Hub</a>
+      <span class="page-header__divider">·</span>
+
+      <div class="page-header__titles">
+        <div class="page-header__title">Travel Hub — Help &amp; Guide</div>
+        <div class="page-header__subtitle">Plan your year in trips, not lists. See how your time fits together.</div>
+      </div>
+
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" onclick="toggleTheme()">
+        <!-- Sun icon (shown in dark mode) -->
+        <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span id="themeLabel">Dark</span>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- ── Main content ───────────────────────────────── -->
+  <main class="page-wrap content">
+
+    <!-- ── Section 1: Quick Start ─────────────────────── -->
+    <section class="section">
+      <div class="section__header">
+        <div class="section__label">Getting started</div>
+        <h2 class="section__title">Quick Start <small style="font-size:0.6em;font-weight:500;color:var(--text-muted)">(60 seconds)</small></h2>
+      </div>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step__num">1</div>
+          <div class="step__body">
+            <div class="step__title">Add a Trip Idea</div>
+            <div class="step__desc">Start with just a name. No destination or dates required yet.</div>
+            <ul class="step__examples">
+              <li>Jazz weekend in New Orleans</li>
+              <li>Beach trip with the girls</li>
+              <li>Japan cherry blossoms</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step__num">2</div>
+          <div class="step__body">
+            <div class="step__title">Add Dates <small style="font-size:0.8em;font-weight:400;color:var(--text-muted)">(even rough ones)</small></div>
+            <div class="step__desc">Approximate dates help you see how your year fits together. You can change them anytime.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step__num">3</div>
+          <div class="step__body">
+            <div class="step__title">Open Calendar</div>
+            <div class="step__desc">Quarter view is best for big-picture planning. Month view is best for detail.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step__num">4</div>
+          <div class="step__body">
+            <div class="step__title">Create a Journey <span class="step__optional">optional</span></div>
+            <div class="step__desc">Journeys group multiple related trips into one bigger adventure.</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Section 2: Understand the Basics ────────────── -->
+    <section class="section">
+      <div class="section__header">
+        <div class="section__label">Core concepts</div>
+        <h2 class="section__title">Understand the Basics</h2>
+      </div>
+
+      <div class="info-list">
+
+        <div class="info-row">
+          <span class="info-row__icon">✈️</span>
+          <div class="info-row__body">
+            <div class="info-row__title">Trips</div>
+            <div class="info-row__desc">A Trip is a single destination and date range. Add tasks, expenses, and notes if you want.</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-row__icon">📅</span>
+          <div class="info-row__body">
+            <div class="info-row__title">Calendar</div>
+            <div class="info-row__desc">The Calendar is where everything comes together — it shows how your trips spread across the year.</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-row__icon">🗺️</span>
+          <div class="info-row__body">
+            <div class="info-row__title">Journeys</div>
+            <div class="info-row__desc">Use Journeys for multi-city travel, road trips, or any trip that has multiple stops.</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Section 3: Tasks & Expenses ─────────────────── -->
+    <section class="section">
+      <div class="section__header">
+        <div class="section__label">Optional features</div>
+        <h2 class="section__title">Tasks &amp; Expenses</h2>
+      </div>
+
+      <div class="card-grid">
+
+        <div class="card">
+          <span class="card__icon">✅</span>
+          <div class="card__title">Tasks</div>
+          <div class="card__body">Use tasks for booking reminders, research, and packing.</div>
+        </div>
+
+        <div class="card">
+          <span class="card__icon">💰</span>
+          <div class="card__title">Expenses</div>
+          <div class="card__body">Track major expenses if you want a rough planned spend for the year. Categories are flexible.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Section 4: Example Data ──────────────────────── -->
+    <section class="section">
+      <div class="section__header">
+        <div class="section__label">Try it first</div>
+        <h2 class="section__title">Example Data <small style="font-size:0.6em;font-weight:500;color:var(--text-muted)">(safe playground)</small></h2>
+      </div>
+
+      <div class="tip-box">
+        Want to explore before entering real trips? Use <code>Load example data</code> from the sidebar. You can clear everything anytime with <code>Clear all data</code>. It's a safe way to see how Calendar and Journeys work.
+      </div>
+    </section>
+
+    <!-- ── Section 5: Backup & Export ───────────────────── -->
+    <section class="section">
+      <div class="section__header">
+        <div class="section__label">Keep your data safe</div>
+        <h2 class="section__title">Backup &amp; Export</h2>
+      </div>
+
+      <div class="card-grid">
+
+        <div class="card">
+          <span class="card__icon">💾</span>
+          <div class="card__title">Backup</div>
+          <div class="card__body">Creates a file of your trips you can save locally. A good habit if you plan a lot.</div>
+        </div>
+
+        <div class="card">
+          <span class="card__icon">📆</span>
+          <div class="card__title">Export Calendar File (.ics)</div>
+          <div class="card__body">Lets you add a trip to Apple Calendar or Google Calendar.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Section 6: Tips ──────────────────────────────── -->
+    <section class="section">
+      <div class="section__header">
+        <div class="section__label">Best practices</div>
+        <h2 class="section__title">Tips</h2>
+      </div>
+
+      <ul class="tips-list">
+        <li>Add rough dates early.</li>
+        <li>Use Quarter view for long-term thinking.</li>
+        <li>Keep trip names descriptive.</li>
+        <li>Use Journeys only when helpful.</li>
+        <li>Mark trips Completed to track your year.</li>
+      </ul>
+    </section>
+
+    <!-- ── Section 7: FAQ ────────────────────────────────── -->
+    <section class="section">
+      <div class="section__header">
+        <div class="section__label">Common questions</div>
+        <h2 class="section__title">FAQ</h2>
+      </div>
+
+      <div class="faq-list">
+
+        <details class="faq-item">
+          <summary>
+            Why does Quarter view show more than Month?
+            <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="faq-answer">Quarter view shows three months at once, so you can see how trips are spaced across a whole season. Month view zooms in on a single month for more detail. Use Quarter when planning ahead, and Month when you need to see exact days.</div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            What happens on January 1?
+            <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="faq-answer">Nothing special — your data stays put. The calendar simply rolls over to the new year. Any trips with dates in the coming year will appear as expected. This is a good time to back up your data and review completed trips from the past year.</div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            Where is my data stored?
+            <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="faq-answer">All your data is stored <strong>locally in your browser</strong> (localStorage). It never leaves your device unless you use the Backup or Export features. To keep a permanent copy or move to another device, use <strong>Backup</strong> to download a file, then <strong>Restore</strong> to load it in a new browser.</div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            Can I edit a Journey later?
+            <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="faq-answer">Yes. Open the Journey from the Journeys tab to rename it, update the description, add or remove trips, and reorder them by dragging. Changes save automatically.</div>
+        </details>
+
+      </div>
+    </section>
+
+    <!-- ── Footer ──────────────────────────────────────── -->
+    <footer class="page-footer">
+      <p class="page-footer__text">Travel Hub stores data locally in your browser. Use Backup to save a copy of your trips.</p>
+    </footer>
+
+  </main>
+
+  <!-- ── Theme toggle script ─────────────────────────── -->
+  <script>
+    (function () {
+      var STORAGE_KEY = 'travelHubTheme';
+      var html = document.documentElement;
+      var sunIcon = document.getElementById('themeIconSun');
+      var moonIcon = document.getElementById('themeIconMoon');
+      var label = document.getElementById('themeLabel');
+
+      function applyTheme(dark) {
+        if (dark) {
+          html.setAttribute('data-theme', 'dark');
+          sunIcon.style.display = '';
+          moonIcon.style.display = 'none';
+          label.textContent = 'Light';
+        } else {
+          html.removeAttribute('data-theme');
+          sunIcon.style.display = 'none';
+          moonIcon.style.display = '';
+          label.textContent = 'Dark';
+        }
+      }
+
+      // Determine initial theme
+      var stored = null;
+      try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var isDark = stored === 'dark' || (stored === null && prefersDark);
+      applyTheme(isDark);
+
+      // Expose toggle function
+      window.toggleTheme = function () {
+        var dark = html.getAttribute('data-theme') === 'dark';
+        var next = !dark;
+        applyTheme(next);
+        try { localStorage.setItem(STORAGE_KEY, next ? 'dark' : 'light'); } catch (e) {}
+      };
+    })();
+  </script>
+
+</body>
+</html>
