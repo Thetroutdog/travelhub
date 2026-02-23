@@ -4199,13 +4199,15 @@ body.modal-open {
 
 /* ── Quick-add row inputs: transparent in unified row ───────────────────── */
 
-.section-card .inline-add-row .input {
+.section-card .inline-add-row .input,
+.section-card .inline-add-row .select {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
 }
 
-.section-card .inline-add-row .input:focus {
+.section-card .inline-add-row .input:focus,
+.section-card .inline-add-row .select:focus {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -4375,14 +4377,16 @@ body.modal-open {
 }
 
 /* Inputs inside borderless add-row: transparent, just the text */
-.section-card:not(.section-card--primary) .inline-add-row .input {
+.section-card:not(.section-card--primary) .inline-add-row .input,
+.section-card:not(.section-card--primary) .inline-add-row .select {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
   padding: var(--space-2) var(--space-2);
 }
 
-.section-card:not(.section-card--primary) .inline-add-row .input:focus {
+.section-card:not(.section-card--primary) .inline-add-row .input:focus,
+.section-card:not(.section-card--primary) .inline-add-row .select:focus {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -4528,7 +4532,8 @@ body.modal-open {
 }
 
 /* Rounder radius on all inputs inside overlay */
-.overlay-content-inner .input {
+.overlay-content-inner .input,
+.overlay-content-inner .select {
   border-radius: 8px;
 }
 

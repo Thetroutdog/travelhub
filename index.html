@@ -10,6 +10,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Hub - Personal Travel Planning</title>
   <link rel="stylesheet" href="./styles.css">
+  <!-- Blocking theme script: runs before first paint to prevent flash of wrong theme.
+       Reads travelHubTheme from localStorage; defaults to dark if no preference stored. -->
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('travelHubTheme');
+        var theme = stored || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
 </head>
 <body>
   <div id="app" v-cloak>
@@ -2048,27 +2061,24 @@
                   step="0.01"
                   aria-label="Amount"
                 >
-                <input
-                  type="text"
-                  class="input input--sm inline-add-row__category"
+                <select
+                  class="select select--sm inline-add-row__category"
                   v-model="quickAddExpenseCategory"
-                  list="expense-category-list"
                   @keydown.enter.prevent="addExpenseQuick"
                   @keydown.escape.stop.prevent="quickAddExpenseTitle = ''; quickAddExpenseAmount = ''; quickAddExpenseCategory = ''; quickAddExpenseError = ''"
-                  placeholder="Category"
                   aria-label="Category"
                 >
-                <datalist id="expense-category-list">
-                  <option value="Lodging">
-                  <option value="Flights">
-                  <option value="Transportation">
-                  <option value="Food">
-                  <option value="Activities">
-                  <option value="Tickets">
-                  <option value="Gear">
-                  <option value="Fees">
-                  <option value="Other">
-                </datalist>
+                  <option value="">Category</option>
+                  <option>Lodging</option>
+                  <option>Flights</option>
+                  <option>Transportation</option>
+                  <option>Food</option>
+                  <option>Activities</option>
+                  <option>Tickets</option>
+                  <option>Gear</option>
+                  <option>Fees</option>
+                  <option>Other</option>
+                </select>
                 <button type="button" class="btn btn--primary btn--sm" @click="addExpenseQuick">Add</button>
                 <div v-if="quickAddExpenseError" class="inline-error inline-error--compact" style="width: 100%;">{{ quickAddExpenseError }}</div>
               </div>
@@ -2127,14 +2137,21 @@
                       </div>
                       <div class="expense-inline-edit__field">
                         <label class="form-label">Category</label>
-                        <input
-                          type="text"
-                          class="input"
+                        <select
+                          class="select"
                           v-model="expenseDraft.category"
-                          list="expense-category-list"
                           @keydown.escape.stop.prevent="cancelExpenseInline"
-                          placeholder="Category"
                         >
+                          <option>Lodging</option>
+                          <option>Flights</option>
+                          <option>Transportation</option>
+                          <option>Food</option>
+                          <option>Activities</option>
+                          <option>Tickets</option>
+                          <option>Gear</option>
+                          <option>Fees</option>
+                          <option>Other</option>
+                        </select>
                       </div>
                       <div v-if="expenseDraftError" class="inline-error">{{ expenseDraftError }}</div>
                       <div class="expense-inline-edit__actions">
@@ -2449,14 +2466,21 @@
 
           <div class="form-field">
             <label for="expense-category" class="form-label">Category</label>
-            <input
+            <select
               id="expense-category"
-              type="text"
-              class="input"
+              class="select"
               v-model="expenseForm.category"
-              list="expense-category-list"
-              placeholder="Category (optional)"
             >
+              <option>Lodging</option>
+              <option>Flights</option>
+              <option>Transportation</option>
+              <option>Food</option>
+              <option>Activities</option>
+              <option>Tickets</option>
+              <option>Gear</option>
+              <option>Fees</option>
+              <option>Other</option>
+            </select>
           </div>
 
           <div class="form-field">
@@ -6871,15 +6895,11 @@
 </html>`;
         },
         initTheme() {
-          // Check localStorage first, then system preference
+          // Check localStorage first; default to dark if no preference stored.
+          // (A blocking script in <head> already applies the theme before first paint
+          //  to prevent flash-of-wrong-theme on iOS Safari and other browsers.)
           const stored = localStorage.getItem('travelHubTheme');
-          if (stored) {
-            this.theme = stored;
-          } else {
-            // Check system preference
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            this.theme = prefersDark ? 'dark' : 'light';
-          }
+          this.theme = stored || 'dark';
           document.documentElement.setAttribute('data-theme', this.theme);
         }
       },
