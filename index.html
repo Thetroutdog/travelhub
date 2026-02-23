@@ -2046,7 +2046,7 @@
                   type="text"
                   class="input input--sm inline-add-row__input"
                   v-model="quickAddExpenseTitle"
-                  @keydown.escape.stop.prevent="quickAddExpenseTitle = ''; quickAddExpenseAmount = ''; quickAddExpenseCategory = ''; quickAddExpenseError = ''"
+                  @keydown.escape.stop.prevent="resetQuickAddExpense"
                   placeholder="Expense title"
                   aria-label="Expense title"
                 >
@@ -2055,33 +2055,45 @@
                   class="input input--sm inline-add-row__amount"
                   v-model="quickAddExpenseAmount"
                   @keydown.enter.prevent="addExpenseQuick"
-                  @keydown.escape.stop.prevent="quickAddExpenseTitle = ''; quickAddExpenseAmount = ''; quickAddExpenseCategory = ''; quickAddExpenseError = ''"
+                  @keydown.escape.stop.prevent="resetQuickAddExpense"
                   placeholder="$0.00"
                   min="0"
                   step="0.01"
                   aria-label="Amount"
                 >
-                <input
-                  type="text"
-                  class="input input--sm inline-add-row__category"
-                  v-model="quickAddExpenseCategory"
-                  :list="isIOSDevice ? null : 'expense-category-list'"
-                  @keydown.enter.prevent="addExpenseQuick"
-                  @keydown.escape.stop.prevent="quickAddExpenseTitle = ''; quickAddExpenseAmount = ''; quickAddExpenseCategory = ''; quickAddExpenseError = ''"
-                  placeholder="Category"
-                  aria-label="Category"
-                >
-                <datalist id="expense-category-list">
-                  <option value="Lodging">
-                  <option value="Flights">
-                  <option value="Transportation">
-                  <option value="Food">
-                  <option value="Activities">
-                  <option value="Tickets">
-                  <option value="Gear">
-                  <option value="Fees">
-                  <option value="Other">
-                </datalist>
+                <!-- Category: native <select> avoids iOS datalist picker bug -->
+                <div class="inline-add-row__category-wrap">
+                  <select
+                    class="select select--sm inline-add-row__category"
+                    v-model="quickAddExpenseCategorySelect"
+                    @keydown.enter.prevent="addExpenseQuick"
+                    @keydown.escape.stop.prevent="resetQuickAddExpense"
+                    aria-label="Category"
+                  >
+                    <option value="">Category</option>
+                    <option>Lodging</option>
+                    <option>Flights</option>
+                    <option>Transportation</option>
+                    <option>Food</option>
+                    <option>Activities</option>
+                    <option>Tickets</option>
+                    <option>Gear</option>
+                    <option>Fees</option>
+                    <option>Other</option>
+                    <option value="__custom__">Custom…</option>
+                  </select>
+                  <input
+                    v-if="quickAddExpenseCategorySelect === '__custom__'"
+                    ref="quickAddCatCustom"
+                    type="text"
+                    class="input input--sm inline-add-row__category-custom"
+                    v-model="quickAddExpenseCategoryCustom"
+                    @keydown.enter.prevent="addExpenseQuick"
+                    @keydown.escape.stop.prevent="resetQuickAddExpense"
+                    placeholder="Category name"
+                    aria-label="Custom category"
+                  >
+                </div>
                 <button type="button" class="btn btn--primary btn--sm" @click="addExpenseQuick">Add</button>
                 <div v-if="quickAddExpenseError" class="inline-error inline-error--compact" style="width: 100%;">{{ quickAddExpenseError }}</div>
               </div>
@@ -2140,13 +2152,31 @@
                       </div>
                       <div class="expense-inline-edit__field">
                         <label class="form-label">Category</label>
+                        <select
+                          class="select"
+                          v-model="expenseDraft.categorySelect"
+                          @keydown.escape.stop.prevent="cancelExpenseInline"
+                        >
+                          <option>Lodging</option>
+                          <option>Flights</option>
+                          <option>Transportation</option>
+                          <option>Food</option>
+                          <option>Activities</option>
+                          <option>Tickets</option>
+                          <option>Gear</option>
+                          <option>Fees</option>
+                          <option>Other</option>
+                          <option value="__custom__">Custom…</option>
+                        </select>
                         <input
+                          v-if="expenseDraft.categorySelect === '__custom__'"
+                          ref="inlineEditCatCustom"
                           type="text"
                           class="input"
-                          v-model="expenseDraft.category"
-                          :list="isIOSDevice ? null : 'expense-category-list'"
+                          style="margin-top: 6px;"
+                          v-model="expenseDraft.categoryCustom"
                           @keydown.escape.stop.prevent="cancelExpenseInline"
-                          placeholder="Category"
+                          placeholder="Category name"
                         >
                       </div>
                       <div v-if="expenseDraftError" class="inline-error">{{ expenseDraftError }}</div>
@@ -2462,13 +2492,30 @@
 
           <div class="form-field">
             <label for="expense-category" class="form-label">Category</label>
-            <input
+            <select
               id="expense-category"
+              class="select"
+              v-model="expenseForm.categorySelect"
+            >
+              <option>Lodging</option>
+              <option>Flights</option>
+              <option>Transportation</option>
+              <option>Food</option>
+              <option>Activities</option>
+              <option>Tickets</option>
+              <option>Gear</option>
+              <option>Fees</option>
+              <option>Other</option>
+              <option value="__custom__">Custom…</option>
+            </select>
+            <input
+              v-if="expenseForm.categorySelect === '__custom__'"
+              ref="modalCatCustom"
               type="text"
               class="input"
-              v-model="expenseForm.category"
-              :list="isIOSDevice ? null : 'expense-category-list'"
-              placeholder="Category (optional)"
+              style="margin-top: 6px;"
+              v-model="expenseForm.categoryCustom"
+              placeholder="Category name"
             >
           </div>
 
@@ -2713,7 +2760,8 @@
             title: '',
             description: '',
             amount: '',
-            category: 'Lodging'
+            categorySelect: 'Lodging',
+            categoryCustom: ''
           },
           expenseFormErrors: {
             title: '',
@@ -2733,7 +2781,7 @@
           todoDraft: { title: '', description: '' }, // draft for inline todo edit
           // Inline (tap-to-edit) state — Expenses
           editingExpenseId: null,    // id of expense being inline-edited (null = none)
-          expenseDraft: { title: '', amount: '', category: 'Other' },
+          expenseDraft: { title: '', amount: '', categorySelect: 'Other', categoryCustom: '' },
           expenseDraftError: '',     // inline error for expense amount validation
           toasts: [],
           importFixes: [],
@@ -2754,7 +2802,8 @@
           quickAddTaskText: '',        // Inline quick-add task input
           quickAddExpenseTitle: '',    // Inline quick-add expense title
           quickAddExpenseAmount: '',
-          quickAddExpenseCategory: '',   // Inline quick-add expense category
+          quickAddExpenseCategorySelect: 'Other', // selected option or '__custom__'
+          quickAddExpenseCategoryCustom: '',    // free-text when Custom… chosen
           quickAddExpenseError: '',    // Inline validation error for quick-add expense
           showOpenMergeModal: false,
           showFileLocationInfoModal: false,
@@ -2801,17 +2850,31 @@
           } else {
             window.removeEventListener('beforeunload', this.handleBeforeUnload);
           }
+        },
+        // Auto-focus custom category inputs when "Custom…" is selected
+        quickAddExpenseCategorySelect(val) {
+          if (val === '__custom__') {
+            this.$nextTick(() => { this.$refs.quickAddCatCustom?.focus(); });
+          }
+        },
+        'expenseDraft.categorySelect'(val) {
+          if (val === '__custom__') {
+            // $refs inside v-for are arrays in Vue 3
+            this.$nextTick(() => {
+              const el = Array.isArray(this.$refs.inlineEditCatCustom)
+                ? this.$refs.inlineEditCatCustom[0]
+                : this.$refs.inlineEditCatCustom;
+              el?.focus();
+            });
+          }
+        },
+        'expenseForm.categorySelect'(val) {
+          if (val === '__custom__') {
+            this.$nextTick(() => { this.$refs.modalCatCustom?.focus(); });
+          }
         }
       },
       computed: {
-        // iOS Safari converts <input list> and <select> to native wheel pickers,
-        // blocking free text entry. On iOS we strip the list attribute entirely
-        // so the field behaves as a plain text input.
-        isIOSDevice() {
-          const ua = navigator.userAgent || '';
-          return /iPad|iPhone|iPod/.test(ua) ||
-            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        },
         currentYear() {
           return new Date().getFullYear();
         },
@@ -4203,27 +4266,25 @@
             title: '',
             description: '',
             amount: '',
-            category: 'Lodging'
+            categorySelect: 'Lodging',
+            categoryCustom: ''
           };
-          this.expenseFormErrors = {
-            title: '',
-            amount: ''
-          };
+          this.expenseFormErrors = { title: '', amount: '' };
           this.showExpenseModal = true;
         },
         openEditExpense(expense) {
           this.expenseModalMode = 'edit';
           this.editingExpense = expense;
+          const cat = expense.category || 'Other';
+          const known = ['Lodging','Flights','Transportation','Food','Activities','Tickets','Gear','Fees','Other'];
           this.expenseForm = {
             title: expense.title,
             description: expense.description || '',
             amount: String(expense.amount),
-            category: expense.category
+            categorySelect: known.includes(cat) ? cat : '__custom__',
+            categoryCustom:  known.includes(cat) ? '' : cat
           };
-          this.expenseFormErrors = {
-            title: '',
-            amount: ''
-          };
+          this.expenseFormErrors = { title: '', amount: '' };
           this.showExpenseModal = true;
         },
         closeExpenseModal() {
@@ -4232,12 +4293,10 @@
             title: '',
             description: '',
             amount: '',
-            category: 'Lodging'
+            categorySelect: 'Lodging',
+            categoryCustom: ''
           };
-          this.expenseFormErrors = {
-            title: '',
-            amount: ''
-          };
+          this.expenseFormErrors = { title: '', amount: '' };
           this.editingExpense = null;
         },
         submitExpenseForm() {
@@ -4265,6 +4324,10 @@
 
           this.expenseFormErrors.amount = '';
 
+          const finalCategory = this.resolveExpenseCategory(
+            this.expenseForm.categorySelect, this.expenseForm.categoryCustom
+          );
+
           if (this.expenseModalMode === 'add') {
             // Add new expense
             const newExpense = {
@@ -4272,7 +4335,7 @@
               title: title,
               description: this.expenseForm.description.trim(),
               amount: amount,
-              category: this.expenseForm.category
+              category: finalCategory
             };
 
             if (!this.selectedTrip.expenses) {
@@ -4284,7 +4347,7 @@
             this.editingExpense.title = title;
             this.editingExpense.description = this.expenseForm.description.trim();
             this.editingExpense.amount = amount;
-            this.editingExpense.category = this.expenseForm.category;
+            this.editingExpense.category = finalCategory;
           }
 
           this.markUnsaved();
@@ -4584,7 +4647,8 @@
           this.quickAddTaskText = '';
           this.quickAddExpenseTitle = '';
           this.quickAddExpenseAmount = '';
-          this.quickAddExpenseCategory = '';
+          this.quickAddExpenseCategorySelect = 'Other';
+          this.quickAddExpenseCategoryCustom = '';
           this.quickAddExpenseError = '';
         },
         startEditTripField(field) {
@@ -4723,10 +4787,13 @@
           if (this.editingTripField !== null) this.cancelTripField();
           if (this.editingTodoId !== null) this.cancelTodoInline();
           this.editingExpenseId = expense.id;
+          const cat = expense.category || 'Other';
+          const known = ['Lodging','Flights','Transportation','Food','Activities','Tickets','Gear','Fees','Other'];
           this.expenseDraft = {
             title: expense.title || '',
             amount: expense.amount !== undefined ? String(expense.amount) : '',
-            category: expense.category || 'Other'
+            categorySelect: known.includes(cat) ? cat : '__custom__',
+            categoryCustom:  known.includes(cat) ? '' : cat
           };
           this.expenseDraftError = '';
         },
@@ -4745,16 +4812,18 @@
           if (expense) {
             expense.title = this.expenseDraft.title.trim();
             expense.amount = amount;
-            expense.category = this.expenseDraft.category;
+            expense.category = this.resolveExpenseCategory(
+              this.expenseDraft.categorySelect, this.expenseDraft.categoryCustom
+            );
             this.markUnsaved();
           }
           this.editingExpenseId = null;
-          this.expenseDraft = { title: '', amount: '', category: 'Other' };
+          this.expenseDraft = { title: '', amount: '', categorySelect: 'Other', categoryCustom: '' };
           this.expenseDraftError = '';
         },
         cancelExpenseInline() {
           this.editingExpenseId = null;
-          this.expenseDraft = { title: '', amount: '', category: 'Other' };
+          this.expenseDraft = { title: '', amount: '', categorySelect: 'Other', categoryCustom: '' };
           this.expenseDraftError = '';
         },
 
@@ -4774,6 +4843,24 @@
         },
 
         // ── Inline Quick-Add: Expenses ────────────────────────────────────────
+        // Resolve the final category string from a select value + optional custom text.
+        // selectVal is a known category name or '__custom__'; customVal is free text.
+        // Falls back to 'Other' when nothing meaningful is provided.
+        resolveExpenseCategory(selectVal, customVal) {
+          if (selectVal === '__custom__') {
+            return (customVal || '').trim() || 'Other';
+          }
+          return (selectVal || '').trim() || 'Other';
+        },
+
+        resetQuickAddExpense() {
+          this.quickAddExpenseTitle = '';
+          this.quickAddExpenseAmount = '';
+          this.quickAddExpenseCategorySelect = 'Other';
+          this.quickAddExpenseCategoryCustom = '';
+          this.quickAddExpenseError = '';
+        },
+
         addExpenseQuick() {
           const title = this.quickAddExpenseTitle.trim();
           const amountStr = String(this.quickAddExpenseAmount).trim();
@@ -4799,12 +4886,11 @@
             title: title,
             description: '',
             amount: amount,
-            category: (this.quickAddExpenseCategory || 'Other').trim() || 'Other'
+            category: this.resolveExpenseCategory(
+              this.quickAddExpenseCategorySelect, this.quickAddExpenseCategoryCustom
+            )
           });
-          this.quickAddExpenseTitle = '';
-          this.quickAddExpenseAmount = '';
-          this.quickAddExpenseCategory = '';
-          this.quickAddExpenseError = '';
+          this.resetQuickAddExpense();
           this.markUnsaved();
         },
 

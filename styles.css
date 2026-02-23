@@ -4086,10 +4086,28 @@ body.modal-open {
   gap: var(--space-2);
 }
 
-.inline-add-row__category {
+/* Wrapper that carries the flex sizing so both select + custom input live inside */
+.inline-add-row__category-wrap {
   min-width: 90px;
   max-width: 140px;
   flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* The <select> inside the wrap fills full width */
+.inline-add-row__category-wrap .inline-add-row__category {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  flex: none;
+}
+
+/* The companion free-text input when "Custom…" is selected */
+.inline-add-row__category-custom {
+  width: 100%;
+  min-width: 0;
 }
 
 /* ── Step 19d: Empty hint in header + compact cards ──────────────────────── */
